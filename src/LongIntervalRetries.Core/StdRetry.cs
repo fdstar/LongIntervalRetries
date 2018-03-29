@@ -1,6 +1,7 @@
 ﻿using LongIntervalRetries.Core.Rules;
 using Quartz;
 using Quartz.Impl;
+using Quartz.Impl.Matchers;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -53,6 +54,9 @@ namespace LongIntervalRetries.Core
                 _scheduler = await StdSchedulerFactory.GetDefaultScheduler().ConfigureAwait(false);
             }
             this._ruleManager = new StdRetryRuleManager();
+            var jobListener = new StdRetryJobListener(this._ruleManager);
+            jobListener.JobExecuted += this.JobExecuted;
+            this._scheduler.ListenerManager.AddJobListener(jobListener, GroupMatcher<JobKey>.GroupEquals(RetryGroupName));
         }
     }
 }
