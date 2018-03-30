@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace LongIntervalRetries.Core.Rules
+namespace LongIntervalRetries.Rules
 {
     /// <summary>
     /// IRetryRuleManager的标准实现

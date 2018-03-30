@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace LongIntervalRetries.Core
+namespace LongIntervalRetries
 {
     /// <summary>
     /// Job每次执行完毕时的回调委托

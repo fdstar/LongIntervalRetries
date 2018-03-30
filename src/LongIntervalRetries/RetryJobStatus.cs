@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace LongIntervalRetries.Core
+namespace LongIntervalRetries
 {
     /// <summary>
     /// 当前Job执行状态

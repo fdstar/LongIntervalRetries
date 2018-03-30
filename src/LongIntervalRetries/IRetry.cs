@@ -1,10 +1,10 @@
-﻿using LongIntervalRetries.Core.Rules;
+﻿using LongIntervalRetries.Rules;
 using Quartz;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace LongIntervalRetries.Core
+namespace LongIntervalRetries
 {
     /// <summary>
     /// Retry规范定义
@@ -27,5 +27,11 @@ namespace LongIntervalRetries.Core
         /// <typeparam name="T"></typeparam>
         /// <param name="registerInfo"></param>
         void RegisterJob<T>(RetryJobRegisterInfo registerInfo) where T : IJob;
+        /// <summary>
+        /// 注册要执行的Job
+        /// </summary>
+        /// <param name="registerInfo"></param>
+        /// <param name="jobType"></param>
+        void RegisterJob(RetryJobRegisterInfo registerInfo, Type jobType);
     }
 }

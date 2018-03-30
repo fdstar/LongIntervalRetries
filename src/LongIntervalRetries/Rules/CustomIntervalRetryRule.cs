@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace LongIntervalRetries.Core.Rules
+namespace LongIntervalRetries.Rules
 {
     /// <summary>
     /// 自定义重试间隔的重试机制

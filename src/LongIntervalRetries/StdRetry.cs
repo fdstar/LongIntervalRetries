@@ -1,4 +1,4 @@
-﻿using LongIntervalRetries.Core.Rules;
+﻿using LongIntervalRetries.Rules;
 using Quartz;
 using Quartz.Impl;
 using Quartz.Impl.Matchers;
@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace LongIntervalRetries.Core
+namespace LongIntervalRetries
 {
     /// <summary>
     /// IRetry的标准实现
@@ -39,21 +39,30 @@ namespace LongIntervalRetries.Core
         /// 默认构造实现
         /// </summary>
         /// <param name="scheduler"></param>
-        public StdRetry(IScheduler scheduler = null)
+        /// <param name="ruleManager"></param>
+        /// <param name="retryJobListener"></param>
+        public StdRetry(IScheduler scheduler = null, IRetryRuleManager ruleManager = null, IRetryJobListener retryJobListener = null)
         {
             this._scheduler = scheduler;
-            this.Init();
+            this._ruleManager = ruleManager;
+            this.Init(retryJobListener);
         }
-        private async void Init()
+        private async void Init(IRetryJobListener retryJobListener)
         {
             if (_scheduler == null)
             {
                 _scheduler = await StdSchedulerFactory.GetDefaultScheduler().ConfigureAwait(false);
             }
-            this._ruleManager = new StdRetryRuleManager();
-            var jobListener = new StdRetryJobListener(this._ruleManager);
-            jobListener.JobExecuted += JobListener_JobExecuted;
-            this._scheduler.ListenerManager.AddJobListener(jobListener, GroupMatcher<JobKey>.GroupEquals(RetryGroupName));
+            if (_ruleManager == null)
+            {
+                this._ruleManager = new StdRetryRuleManager();
+            }
+            if (retryJobListener == null)
+            {
+                retryJobListener = new StdRetryJobListener(this._ruleManager);
+            }
+            retryJobListener.JobExecuted += JobListener_JobExecuted;
+            this._scheduler.ListenerManager.AddJobListener(retryJobListener, GroupMatcher<JobKey>.GroupEquals(RetryGroupName));
         }
 
         private void JobListener_JobExecuted(RetryJobExecutedInfo executedInfo)
@@ -90,8 +99,17 @@ namespace LongIntervalRetries.Core
         /// <param name="registerInfo"></param>
         public void RegisterJob<T>(RetryJobRegisterInfo registerInfo) where T : IJob
         {
+            RegisterJob(registerInfo, typeof(T));
+        }
+        /// <summary>
+        /// 注册要执行的Job
+        /// </summary>
+        /// <param name="registerInfo"></param>
+        /// <param name="jobType"></param>
+        public void RegisterJob(RetryJobRegisterInfo registerInfo, Type jobType)
+        {
             var ts = this._ruleManager.GetRule(registerInfo.UsedRuleName)?.GetNextFireSpan(registerInfo.ExecutedNumber);
-            var startTime = (registerInfo.StartAtTimeUtc ?? DateTimeOffset.UtcNow).AddSeconds(ts?.TotalSeconds ?? 0);
+            var startTime = (registerInfo.PreviousFireTimeUtc ?? DateTimeOffset.UtcNow).AddSeconds(ts?.TotalSeconds ?? 0);
             if (startTime < DateTimeOffset.UtcNow)
             {
                 startTime = DateTimeOffset.UtcNow;
@@ -99,7 +117,7 @@ namespace LongIntervalRetries.Core
             var jobMap = new JobDataMap(registerInfo.JobMap);
             jobMap[ExecutedNumberContextKey] = registerInfo.ExecutedNumber;
             jobMap[RetryRuleNameContextKey] = registerInfo.UsedRuleName;
-            var job = QuartzHelper.BuildJob<T>(jobMap);
+            var job = QuartzHelper.BuildJob(jobType, jobMap);
             var trigger = QuartzHelper.BuildTrigger(startTime);
             _scheduler.ScheduleJob(job, trigger);
         }

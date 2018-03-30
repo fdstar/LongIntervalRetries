@@ -1,15 +1,15 @@
-﻿using LongIntervalRetries.Core.Rules;
-using Quartz.Listener;
+﻿using Quartz.Listener;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using Quartz;
 using System.Threading;
 using System.Threading.Tasks;
+using LongIntervalRetries.Rules;
 
-namespace LongIntervalRetries.Core
+namespace LongIntervalRetries
 {
-    internal class StdRetryJobListener : JobListenerSupport
+    internal class StdRetryJobListener : JobListenerSupport, IRetryJobListener
     {
         private IRetryRuleManager _ruleManager;
         public event RetryJobExecuted JobExecuted;
