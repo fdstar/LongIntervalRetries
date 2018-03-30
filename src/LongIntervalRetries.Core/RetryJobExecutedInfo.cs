@@ -25,7 +25,7 @@ namespace LongIntervalRetries.Core
         /// <summary>
         /// 当前执行的Job类型
         /// </summary>
-        public Type JobType { get; set; }
+        internal Type JobType { get; set; }
         /// <summary>
         /// 当前Context中传递的JobData
         /// </summary>

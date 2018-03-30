@@ -7,22 +7,22 @@ namespace LongIntervalRetries.Core
 {
     internal class QuartzHelper
     {
-        public static ITrigger BuildTrigger(DateTimeOffset? startAt)
+        public static ITrigger BuildTrigger(DateTimeOffset? startAt, string name = null)
         {
             return TriggerBuilder.Create()
-                .WithIdentity(Guid.NewGuid().ToString(), StdRetry.RetryGroupName)
+                .WithIdentity(name ?? Guid.NewGuid().ToString(), StdRetry.RetryGroupName)
                 .StartAt(startAt ?? DateTimeOffset.UtcNow)
                 .WithSimpleSchedule(x => x.WithRepeatCount(0))
                 .Build();
         }
-        public static IJobDetail BuildJob<T>(JobDataMap map) where T : IJob
+        public static IJobDetail BuildJob<T>(JobDataMap map, string name = null) where T : IJob
         {
-            return BuildJob(typeof(T), map);
+            return BuildJob(typeof(T), map, name);
         }
-        public static IJobDetail BuildJob(Type type, JobDataMap map)
+        public static IJobDetail BuildJob(Type type, JobDataMap map, string name = null)
         {
             return JobBuilder.Create(type)
-                .WithIdentity(Guid.NewGuid().ToString(), StdRetry.RetryGroupName)
+                .WithIdentity(name ?? Guid.NewGuid().ToString(), StdRetry.RetryGroupName)
                 .SetJobData(map)
                 .Build();
         }

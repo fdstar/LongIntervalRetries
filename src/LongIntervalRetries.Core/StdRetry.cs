@@ -15,10 +15,7 @@ namespace LongIntervalRetries.Core
     {
         private IScheduler _scheduler;
         private IRetryRuleManager _ruleManager;
-        /// <summary>
-        /// Job已执行事件
-        /// </summary>
-        public event RetryJobExecuted JobExecuted;
+        private Dictionary<string, RetryJobExecuted> _events = new Dictionary<string, RetryJobExecuted>();
         /// <summary>
         /// 重试Job以及Trigger所属的Group
         /// </summary>
@@ -55,8 +52,56 @@ namespace LongIntervalRetries.Core
             }
             this._ruleManager = new StdRetryRuleManager();
             var jobListener = new StdRetryJobListener(this._ruleManager);
-            jobListener.JobExecuted += this.JobExecuted;
+            jobListener.JobExecuted += JobListener_JobExecuted;
             this._scheduler.ListenerManager.AddJobListener(jobListener, GroupMatcher<JobKey>.GroupEquals(RetryGroupName));
+        }
+
+        private void JobListener_JobExecuted(RetryJobExecutedInfo executedInfo)
+        {
+            var key = this.GetEventIdentity(executedInfo.JobType);
+            if (this._events.ContainsKey(key))
+            {
+                this._events[key]?.Invoke(executedInfo);
+            }
+        }
+        /// <summary>
+        /// 获取RetryJobExecuted注册的对应IJob应当如何获取唯一性标志
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        protected virtual string GetEventIdentity(Type type)
+        {
+            return type.FullName;
+        }
+
+        /// <summary>
+        /// 注册处理事件
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="event"></param>
+        public void RegisterEvent<T>(RetryJobExecuted @event) where T : IJob
+        {
+            this._events[this.GetEventIdentity(typeof(T))] = @event;
+        }
+        /// <summary>
+        /// 注册要执行的Job，注意此处不判断<see cref="IRetryRule"/>获取的TimeSpan是否小于TimeSpan.Zero，即注册的IJob必定会被执行
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="registerInfo"></param>
+        public void RegisterJob<T>(RetryJobRegisterInfo registerInfo) where T : IJob
+        {
+            var ts = this._ruleManager.GetRule(registerInfo.UsedRuleName)?.GetNextFireSpan(registerInfo.ExecutedNumber);
+            var startTime = (registerInfo.StartAtTimeUtc ?? DateTimeOffset.UtcNow).AddSeconds(ts?.TotalSeconds ?? 0);
+            if (startTime < DateTimeOffset.UtcNow)
+            {
+                startTime = DateTimeOffset.UtcNow;
+            }
+            var jobMap = new JobDataMap(registerInfo.JobMap);
+            jobMap[ExecutedNumberContextKey] = registerInfo.ExecutedNumber;
+            jobMap[RetryRuleNameContextKey] = registerInfo.UsedRuleName;
+            var job = QuartzHelper.BuildJob<T>(jobMap);
+            var trigger = QuartzHelper.BuildTrigger(startTime);
+            _scheduler.ScheduleJob(job, trigger);
         }
     }
 }
