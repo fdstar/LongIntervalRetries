@@ -87,7 +87,7 @@ namespace LongIntervalRetries
             var list = await this._store.GetAllUnfinishedRetries().ConfigureAwait(false);
             if (list != null)
             {
-                foreach (var info in list)
+                foreach (var info in list.Where(s => s.JobStatus == RetryJobStatus.Continue))
                 {
                     await this.RegisterJob(info).ConfigureAwait(false);
                 }
@@ -95,7 +95,7 @@ namespace LongIntervalRetries
         }
         private async void JobListener_JobExecuted(RetryJobExecutedInfo executedInfo)
         {
-            await this._store.Update(this.GetStoredInfo(executedInfo));
+            await this._store.Update(this.GetStoredInfo(executedInfo)).ConfigureAwait(false);
             var key = this.GetEventIdentity(executedInfo.JobType);
             if (this._events.ContainsKey(key))
             {
