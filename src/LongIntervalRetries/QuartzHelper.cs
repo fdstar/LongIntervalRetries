@@ -10,7 +10,7 @@ namespace LongIntervalRetries
         public static ITrigger BuildTrigger(DateTimeOffset? startAt, string name = null)
         {
             return TriggerBuilder.Create()
-                .WithIdentity(name ?? Guid.NewGuid().ToString(), StdRetry.RetryGroupName)
+                .WithIdentity(name ?? Guid.NewGuid().ToString(), StdRetrySetting.RetryGroupName)
                 .StartAt(startAt ?? DateTimeOffset.UtcNow)
                 .WithSimpleSchedule(x => x.WithRepeatCount(0))
                 .Build();
@@ -22,7 +22,7 @@ namespace LongIntervalRetries
         public static IJobDetail BuildJob(Type type, JobDataMap map, string name = null)
         {
             return JobBuilder.Create(type)
-                .WithIdentity(name ?? Guid.NewGuid().ToString(), StdRetry.RetryGroupName)
+                .WithIdentity(name ?? Guid.NewGuid().ToString(), StdRetrySetting.RetryGroupName)
                 .SetJobData(map)
                 .Build();
         }

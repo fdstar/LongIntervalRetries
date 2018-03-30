@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LongIntervalRetries.Rules;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -26,6 +27,14 @@ namespace LongIntervalRetries
         /// 当前执行的Job类型
         /// </summary>
         internal Type JobType { get; set; }
+        /// <summary>
+        /// <see cref="Stores.StoredInfo{TKey}.Id"/>
+        /// </summary>
+        internal object StoredInfoId { get; set; }
+        /// <summary>
+        /// 要采用的<see cref="IRetryRule"/>规则，若不设定，则采用第一条规则
+        /// </summary>
+        internal string UsedRuleName { get; set; }
         /// <summary>
         /// 当前Context中传递的JobData
         /// </summary>

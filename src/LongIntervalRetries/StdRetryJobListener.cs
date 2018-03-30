@@ -21,37 +21,42 @@ namespace LongIntervalRetries
 
         public override Task JobWasExecuted(IJobExecutionContext context, JobExecutionException jobException, CancellationToken cancellationToken = default(CancellationToken))
         {
-            if (context.Trigger.Key.Group == StdRetry.RetryGroupName)
+            if (context.Trigger.Key.Group == StdRetrySetting.RetryGroupName)
             {
                 this.Deal(context, jobException);
             }
             return base.JobWasExecuted(context, jobException, cancellationToken);
         }
-        private void Deal(IJobExecutionContext context, JobExecutionException jobException)
+        private async void Deal(IJobExecutionContext context, JobExecutionException jobException)
         {
             var jobMap = context.JobDetail.JobDataMap;
-            var executedNumber = jobMap.GetIntValue(StdRetry.ExecutedNumberContextKey) + 1;
+            var executedNumber = jobMap.GetIntValue(StdRetrySetting.ExecutedNumberContextKey) + 1;
             if (executedNumber < 1) executedNumber = 1;
-            var removeKeies = new string[] { StdRetry.ExecutedNumberContextKey, StdRetry.RetryRuleNameContextKey };
+            var removeKeies = new string[] { StdRetrySetting.ExecutedNumberContextKey, StdRetrySetting.RetryRuleNameContextKey, StdRetrySetting.RetryStoredInfoIdContextKey };
             var executedJobMap = new Dictionary<string, object>(jobMap);
             var jobType = context.JobDetail.JobType;
+            object storeId = null;
+            if (jobMap.ContainsKey(StdRetrySetting.RetryStoredInfoIdContextKey))
+            {
+                storeId = jobMap[StdRetrySetting.RetryStoredInfoIdContextKey];
+            }
             foreach (var key in removeKeies)
             {
                 executedJobMap.Remove(key);
             }
             var jobStatus = RetryJobStatus.Completed;
+            var ruleName = jobMap.GetString(StdRetrySetting.RetryRuleNameContextKey);
             if (jobException != null)
             {
                 jobStatus = RetryJobStatus.Canceled;
-                var ruleName = jobMap.GetString(StdRetry.RetryRuleNameContextKey);
                 var ts = this._ruleManager.GetRule(ruleName)?.GetNextFireSpan(executedNumber);
                 if (ts >= TimeSpan.Zero)
                 {
                     jobStatus = RetryJobStatus.Continue;
                     var trigger = QuartzHelper.BuildTrigger(DateTimeOffset.UtcNow.AddSeconds(ts.Value.TotalSeconds));
-                    jobMap[StdRetry.ExecutedNumberContextKey] = executedNumber;
+                    jobMap[StdRetrySetting.ExecutedNumberContextKey] = executedNumber;
                     var job = QuartzHelper.BuildJob(jobType, jobMap);
-                    context.Scheduler.ScheduleJob(job, trigger);
+                    await context.Scheduler.ScheduleJob(job, trigger).ConfigureAwait(false);
                 }
             }
             var executedInfo = new RetryJobExecutedInfo()
@@ -61,7 +66,9 @@ namespace LongIntervalRetries
                 ScheduledFireTimeUtc = context.ScheduledFireTimeUtc,
                 JobType = jobType,
                 ExecutedNumber = executedNumber,
-                JobMap = executedJobMap
+                JobMap = executedJobMap,
+                StoredInfoId = storeId,
+                UsedRuleName = ruleName
             };
             this.JobExecuted?.Invoke(executedInfo);
         }

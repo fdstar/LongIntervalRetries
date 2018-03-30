@@ -3,6 +3,7 @@ using Quartz;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace LongIntervalRetries
 {
@@ -18,20 +19,28 @@ namespace LongIntervalRetries
         /// <summary>
         /// 注册处理事件
         /// </summary>
-        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="TJob"><see cref="IJob"/></typeparam>
         /// <param name="event"></param>
-        void RegisterEvent<T>(RetryJobExecuted @event) where T : IJob;
+        void RegisterEvent<TJob>(RetryJobExecuted @event) where TJob : IJob;
         /// <summary>
         /// 注册要执行的Job
         /// </summary>
-        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="TJob"><see cref="IJob"/></typeparam>
         /// <param name="registerInfo"></param>
-        void RegisterJob<T>(RetryJobRegisterInfo registerInfo) where T : IJob;
+        Task RegisterJob<TJob>(RetryJobRegisterInfo registerInfo) where TJob : IJob;
         /// <summary>
         /// 注册要执行的Job
         /// </summary>
         /// <param name="registerInfo"></param>
         /// <param name="jobType"></param>
-        void RegisterJob(RetryJobRegisterInfo registerInfo, Type jobType);
+        Task RegisterJob(RetryJobRegisterInfo registerInfo, Type jobType);
+        /// <summary>
+        /// 启动Job执行
+        /// </summary>
+        void Start();
+        /// <summary>
+        /// 停止执行
+        /// </summary>
+        void Stop();
     }
 }
