@@ -14,17 +14,23 @@ namespace LongIntervalRetries.Rules
         /// <summary>
         /// 默认构造实现
         /// </summary>
+        /// <param name="name">该RetryRule的唯一性名称</param>
         /// <param name="maxExecutedNumber">允许的最大重试次数（含）</param>
         /// <param name="timeSpan"></param>
-        public SimpleRepeatRetryRule(int maxExecutedNumber,TimeSpan timeSpan)
+        public SimpleRepeatRetryRule(string name, int maxExecutedNumber, TimeSpan timeSpan)
         {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new ArgumentNullException("name can not be empty");
+            }
+            this.Name = name;
             this._maxExecutedNumber = maxExecutedNumber;
             this._timeSpan = timeSpan;
         }
         /// <summary>
         /// Get the name of the IRetryRule
         /// </summary>
-        public string Name => "LongIntervalRetries.SimpleRepeatRetryRule";
+        public string Name { get; private set; }
         /// <summary>
         /// 根据已经执行的次数获取下一次执行时间间隔，返回小于TimeSpan.Zero的值表示不再需要执行
         /// </summary>
