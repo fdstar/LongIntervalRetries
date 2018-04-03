@@ -13,7 +13,7 @@ namespace LongIntervalRetries
         /// <summary>
         /// 当前Context中传递的JobData
         /// </summary>
-        public IDictionary<string, object> JobMap { get; set; }
+        public IDictionary<string, object> JobMap { get; set; } = new Dictionary<string, object>();
         /// <summary>
         /// 要采用的<see cref="IRetryRule"/>规则，若不设定，则采用第一条规则
         /// </summary>

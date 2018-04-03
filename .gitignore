@@ -3,3 +3,7 @@
 /src/LongIntervalRetries.Core/bin
 /src/LongIntervalRetries/bin
 /src/LongIntervalRetries/obj
+/src/LongIntervalRetries.Samples.Default/obj
+/src/LongIntervalRetries.Samples.Default/bin
+/src/LongIntervalRetries.Samples.Jobs/obj
+/src/LongIntervalRetries.Samples.Jobs/bin
