@@ -6,11 +6,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="Topshelf" Version="4.1.0.117-develop" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\LongIntervalRetries.Samples.Jobs\LongIntervalRetries.Samples.Jobs.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="NLog.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
