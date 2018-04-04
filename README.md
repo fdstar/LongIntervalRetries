@@ -1,5 +1,5 @@
 # LongIntervalRetries
-这是一个基于Quartz.Net的重试类库，该类库对应需长时间间隔运行的业务类型，比如通知服务
+这是一个基于Quartz.Net的重试类库，该类库对应需长时间间隔重试的业务类型，比如通知服务
 
 ## .NET版本支持
 目前支持以下版本：`.NET452`、`.NET Standard 2.0`
@@ -29,7 +29,7 @@ var retry = new StdRetry();
 string simpleRuleName = "SimpleRepeatRetryRule";
 var simpleRepeatRule = new SimpleRepeatRetryRule(simpleRuleName, 5, TimeSpan.FromSeconds(2));
 retry.RuleManager.AddRule(simpleRepeatRule);
-var registerInfo = new
+var registerInfo = new RetryJobRegisterInfo
 {
     //指定要采用的重试规则，如果不设置，则默认使用已注册的第一项
     UsedRuleName = simpleRuleName,
@@ -51,7 +51,7 @@ retry.Start();//启动Quartz服务
 //启动服务后仍可以RegisterJob、RegisterEvent
 ```
 
-## 完整的例子
+## Samples构成说明
 ### LongIntervalRetries.Samples.Jobs
 该例子包含以下Job
 * `SimpleJob`所有例子Job的基类
