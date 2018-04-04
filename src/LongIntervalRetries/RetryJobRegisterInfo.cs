@@ -18,5 +18,9 @@ namespace LongIntervalRetries
         /// 要采用的<see cref="IRetryRule"/>规则，若不设定，则采用第一条规则
         /// </summary>
         public string UsedRuleName { get; set; }
+        /// <summary>
+        /// 首次开始运行时间，不赋值则代表立刻运行
+        /// </summary>
+        public DateTimeOffset? StartAt { get; set; }
     }
 }

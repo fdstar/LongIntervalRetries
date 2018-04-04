@@ -162,6 +162,7 @@ namespace LongIntervalRetries
             {
                 JobStatus = RetryJobStatus.Continue,
                 JobMap = registerInfo.JobMap,
+                PreviousFireTimeUtc = registerInfo.StartAt,
                 JobType = jobType,
                 UsedRuleName = registerInfo.UsedRuleName,
             };

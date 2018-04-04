@@ -25,7 +25,7 @@ namespace LongIntervalRetries.Samples.Default
             retry.RuleManager.AddRule(customIntervalRule);
 
             var tasks = new Task[] {
-                retry.RegisterJob<AlawaysSuccessJob>(new RetryJobRegisterInfo{ UsedRuleName= simpleRuleName}),
+                retry.RegisterJob<AlawaysSuccessJob>(new RetryJobRegisterInfo{ UsedRuleName= simpleRuleName, StartAt= DateTimeOffset.UtcNow.AddSeconds(3)}),
                 retry.RegisterJob<AlawaysFailJob>(new RetryJobRegisterInfo{ UsedRuleName= customRuleName}),
                 retry.RegisterJob<MaybeFailJob>(new RetryJobRegisterInfo{ JobMap=new Dictionary<string,object>{ {"Id",1 } } , UsedRuleName= customRuleName}),
                 retry.RegisterJob<MaybeFailJob>(new RetryJobRegisterInfo{ JobMap=new Dictionary<string,object>{ {"Id",2 } } ,UsedRuleName= customRuleName}),
