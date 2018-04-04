@@ -22,7 +22,36 @@
 * `SimpleRepeatRetryRule`简单重试规则，该规则简单的定义了最大重试次数以及简单的重试间隔
 * `CustomIntervalRetryRule`自定义间隔重试规则，该规则接收一系列的时间参数`params TimeSpan[] intervals`，该数组的`Length`属性即为允许尝试的最大次数，该规则会直接将执行次数作为索引获取对应`TimeSpan`
 
-## Samples
+### 快速使用
+```csharp
+var retry = new StdRetry();
+//声明并注册重试规则
+string simpleRuleName = "SimpleRepeatRetryRule";
+var simpleRepeatRule = new SimpleRepeatRetryRule(simpleRuleName, 5, TimeSpan.FromSeconds(2));
+retry.RuleManager.AddRule(simpleRepeatRule);
+var registerInfo = new
+{
+    //指定要采用的重试规则，如果不设置，则默认使用已注册的第一项
+    UsedRuleName = simpleRuleName,
+    //需要传递给IJob的上下文数据
+    JobMap = new Dictionary<string, object>
+    {
+        {"SomeKey","SomeValue" }
+    },
+    //开始执行时间，如果不指定则表示立刻执行
+    StartAt = DateTimeOffset.UtcNow.AddSeconds(3),
+};
+//注册要执行的Job
+retry.RegisterJob<SomeJob>(registerInfo);
+//注册每次Job执行后的通知事件
+retry.RegisterEvent<SomeJob>(e =>
+{//Some code
+});
+retry.Start();//启动Quartz服务
+//启动服务后仍可以RegisterJob、RegisterEvent
+```
+
+## 完整的例子
 ### LongIntervalRetries.Samples.Jobs
 该例子包含以下Job
 * `SimpleJob`所有例子Job的基类

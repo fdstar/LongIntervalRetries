@@ -15,9 +15,10 @@ namespace LongIntervalRetries.Samples.Default
         protected static readonly Logger Logger = LogManager.GetLogger("Default");
         static void Main(string[] args)
         {
+            var retry = new StdRetry();
             string simpleRuleName = "SimpleRepeatRetryRule";
             string customRuleName = "CustomIntervalRetryRule";
-            var retry = new StdRetry();
+            //声明并注册重试规则
             var simpleRepeatRule = new SimpleRepeatRetryRule(simpleRuleName, 5, TimeSpan.FromSeconds(2));
             var customIntervalRule = new CustomIntervalRetryRule(customRuleName,
                 Enumerable.Range(1, 6).Select(r => TimeSpan.FromSeconds(r)).ToArray());
@@ -25,6 +26,7 @@ namespace LongIntervalRetries.Samples.Default
             retry.RuleManager.AddRule(customIntervalRule);
 
             var tasks = new Task[] {
+                //注册Job
                 retry.RegisterJob<AlawaysSuccessJob>(new RetryJobRegisterInfo{ UsedRuleName= simpleRuleName, StartAt= DateTimeOffset.UtcNow.AddSeconds(3)}),
                 retry.RegisterJob<AlawaysFailJob>(new RetryJobRegisterInfo{ UsedRuleName= customRuleName}),
                 retry.RegisterJob<MaybeFailJob>(new RetryJobRegisterInfo{ JobMap=new Dictionary<string,object>{ {"Id",1 } } , UsedRuleName= customRuleName}),
@@ -34,6 +36,7 @@ namespace LongIntervalRetries.Samples.Default
                 retry.RegisterJob<MaybeFailJob>(new RetryJobRegisterInfo{ JobMap=new Dictionary<string,object>{ {"Id",5 } } ,UsedRuleName= "NotSetRule"}),
             };
 
+            //注册执行完时的通知事件
             retry.RegisterEvent<AlawaysSuccessJob>(e =>
             {
                 Logger.Info("AlawaysSuccessJob Result:{0}", JsonConvert.SerializeObject(e));
