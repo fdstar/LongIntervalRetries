@@ -17,7 +17,7 @@ namespace LongIntervalRetries.Stores
             return Task.FromResult(default(TKey));
         }
 
-        public Task Update(StoredInfo<TKey> entit)
+        public Task Executed(StoredExecutedInfo<TKey> entit)
         {
             return Task.FromResult(true);
         }

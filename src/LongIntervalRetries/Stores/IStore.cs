@@ -17,16 +17,16 @@ namespace LongIntervalRetries.Stores
         /// <returns></returns>
         Task<IEnumerable<StoredInfo<TKey>>> GetAllUnfinishedRetries();
         /// <summary>
-        /// 添加Job
+        /// 添加Job信息
         /// </summary>
         /// <param name="entity"></param>
         /// <returns></returns>
         Task<TKey> InsertAndGetId(StoredInfo<TKey> entity);
         /// <summary>
-        /// 更新Job
+        /// 更新执行信息
         /// </summary>
         /// <param name="entit"></param>
         /// <returns></returns>
-        Task Update(StoredInfo<TKey> entit);
+        Task Executed(StoredExecutedInfo<TKey> entit);
     }
 }
