@@ -19,10 +19,10 @@ namespace LongIntervalRetries
         /// <summary>
         /// 默认构造实现
         /// </summary>
-        /// <param name="scheduler"></param>
-        /// <param name="store"></param>
-        /// <param name="ruleManager"></param>
-        /// <param name="retryJobListener"></param>
+        /// <param name="scheduler"><see cref="IScheduler"/></param>
+        /// <param name="store"><see cref="IStore{TKey}"/></param>
+        /// <param name="ruleManager"><see cref="IRetryRuleManager"/></param>
+        /// <param name="retryJobListener"><see cref="IRetryJobListener"/></param>
         public StdRetry(IScheduler scheduler = null, IStore<long> store = null, IRetryRuleManager ruleManager = null, IRetryJobListener retryJobListener = null)
             : base(scheduler, store, ruleManager, retryJobListener)
         {
