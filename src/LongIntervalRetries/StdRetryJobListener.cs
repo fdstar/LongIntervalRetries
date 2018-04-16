@@ -6,6 +6,7 @@ using Quartz;
 using System.Threading;
 using System.Threading.Tasks;
 using LongIntervalRetries.Rules;
+using LongIntervalRetries.Exceptions;
 
 namespace LongIntervalRetries
 {
@@ -49,14 +50,22 @@ namespace LongIntervalRetries
             if (jobException != null)
             {
                 jobStatus = RetryJobStatus.Canceled;
-                var ts = this._ruleManager.GetRule(ruleName)?.GetNextFireSpan(executedNumber);
-                if (ts >= TimeSpan.Zero)
+                if (jobException.InnerException?.InnerException != null
+                    && jobException.InnerException?.InnerException is RetryJobAbortedException)
                 {
-                    jobStatus = RetryJobStatus.Continue;
-                    var trigger = QuartzHelper.BuildTrigger(DateTimeOffset.UtcNow.AddSeconds(ts.Value.TotalSeconds));
-                    jobMap[StdRetrySetting.ExecutedNumberContextKey] = executedNumber;
-                    var job = QuartzHelper.BuildJob(jobType, jobMap);
-                    await context.Scheduler.ScheduleJob(job, trigger).ConfigureAwait(false);
+                    jobStatus = RetryJobStatus.Aborted;
+                }
+                else
+                {
+                    var ts = this._ruleManager.GetRule(ruleName)?.GetNextFireSpan(executedNumber);
+                    if (ts >= TimeSpan.Zero)
+                    {
+                        jobStatus = RetryJobStatus.Continue;
+                        var trigger = QuartzHelper.BuildTrigger(DateTimeOffset.UtcNow.AddSeconds(ts.Value.TotalSeconds));
+                        jobMap[StdRetrySetting.ExecutedNumberContextKey] = executedNumber;
+                        var job = QuartzHelper.BuildJob(jobType, jobMap);
+                        await context.Scheduler.ScheduleJob(job, trigger).ConfigureAwait(false);
+                    }
                 }
             }
             var executedInfo = new RetryJobExecutedInfo()

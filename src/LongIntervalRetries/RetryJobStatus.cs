@@ -18,8 +18,12 @@ namespace LongIntervalRetries
         /// </summary>
         Completed = 1,
         /// <summary>
-        /// 未完成已取消
+        /// 未完成已取消，表示已达到最大重试次数
         /// </summary>
-        Canceled = 2
+        Canceled = 2,
+        /// <summary>
+        /// 由job给定异常指定终止
+        /// </summary>
+        Aborted = 3,
     }
 }
