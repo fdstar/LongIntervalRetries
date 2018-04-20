@@ -31,7 +31,7 @@ namespace LongIntervalRetries
     /// <summary>
     /// IRetry的标准实现
     /// </summary>
-    /// <typeparam name="TKey"><see cref="Stores.StoredInfo{TKey}.Id"/></typeparam>
+    /// <typeparam name="TKey"><see cref="Stores.StoredExecutedInfo{TKey}.Id"/></typeparam>
     public class StdRetry<TKey> : IRetry
     {
         private IScheduler _scheduler;

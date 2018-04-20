@@ -7,13 +7,16 @@ using System.Threading;
 using System.Threading.Tasks;
 using LongIntervalRetries.Rules;
 using LongIntervalRetries.Exceptions;
+using System.Collections.Concurrent;
 
 namespace LongIntervalRetries
 {
     internal class StdRetryJobListener : JobListenerSupport, IRetryJobListener
     {
         private IRetryRuleManager _ruleManager;
+        private ConcurrentDictionary<Type, bool> _dictionary = new ConcurrentDictionary<Type, bool>();
         public event RetryJobExecuted JobExecuted;
+
         public StdRetryJobListener(IRetryRuleManager ruleManager)
         {
             this._ruleManager = ruleManager;
@@ -28,14 +31,29 @@ namespace LongIntervalRetries
             }
             return base.JobWasExecuted(context, jobException, cancellationToken);
         }
+        private bool ContainsPersistJobDataAfterExecutionAttribute(Type jobType)
+        {
+            var attrs = jobType.GetCustomAttributes(typeof(PersistJobDataAfterExecutionAttribute), false);
+            return attrs != null && attrs.Length > 0;
+        }
         private async void Deal(IJobExecutionContext context, JobExecutionException jobException)
         {
             var jobMap = context.JobDetail.JobDataMap;
+            var jobType = context.JobDetail.JobType;
+            if (!_dictionary.ContainsKey(jobType))
+            {
+                var contains = ContainsPersistJobDataAfterExecutionAttribute(jobType);
+                _dictionary.AddOrUpdate(jobType, contains, (t, v) => contains);
+            }
+            var persistJobData = _dictionary[jobType];
+            if (persistJobData)
+            {
+                jobMap = context.MergedJobDataMap;
+            }
             var executedNumber = jobMap.GetIntValue(StdRetrySetting.ExecutedNumberContextKey) + 1;
             if (executedNumber < 1) executedNumber = 1;
             var removeKeies = new string[] { StdRetrySetting.ExecutedNumberContextKey, StdRetrySetting.RetryRuleNameContextKey, StdRetrySetting.RetryStoredInfoIdContextKey };
             var executedJobMap = new Dictionary<string, object>(jobMap);
-            var jobType = context.JobDetail.JobType;
             object storeId = null;
             if (jobMap.ContainsKey(StdRetrySetting.RetryStoredInfoIdContextKey))
             {
@@ -77,7 +95,8 @@ namespace LongIntervalRetries
                 ExecutedNumber = executedNumber,
                 JobMap = executedJobMap,
                 StoredInfoId = storeId,
-                UsedRuleName = ruleName
+                UsedRuleName = ruleName,
+                PersistJobData = persistJobData
             };
             this.JobExecuted?.Invoke(executedInfo);
         }

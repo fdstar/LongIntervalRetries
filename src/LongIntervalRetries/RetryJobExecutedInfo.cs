@@ -28,7 +28,7 @@ namespace LongIntervalRetries
         /// </summary>
         internal Type JobType { get; set; }
         /// <summary>
-        /// <see cref="Stores.StoredInfo{TKey}.Id"/>
+        /// <see cref="Stores.StoredExecutedInfo{TKey}.Id"/>
         /// </summary>
         internal object StoredInfoId { get; set; }
         /// <summary>
@@ -39,6 +39,10 @@ namespace LongIntervalRetries
         /// 当前Context中传递的JobData
         /// </summary>
         public IDictionary<string, object> JobMap { get; set; }
+        /// <summary>
+        /// 是否需要持久化<see cref="JobMap"/>数据
+        /// </summary>
+        public bool PersistJobData { get; set; }
         /// <summary>
         /// Job计划执行时间
         /// </summary>
