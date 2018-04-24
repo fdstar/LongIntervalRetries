@@ -7,3 +7,5 @@
 /src/LongIntervalRetries.Samples.Default/bin
 /src/LongIntervalRetries.Samples.Jobs/obj
 /src/LongIntervalRetries.Samples.Jobs/bin
+/src/LongIntervalRetries.Stores.AdoStores/obj
+/src/LongIntervalRetries.Stores.AdoStores/bin
