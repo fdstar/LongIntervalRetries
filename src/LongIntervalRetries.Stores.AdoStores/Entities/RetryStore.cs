@@ -34,5 +34,13 @@ namespace LongIntervalRetries.Stores.AdoStores.Entities
         /// 要采用的<see cref="IRetryRule"/>规则，若不设定，则采用第一条规则
         /// </summary>
         public string UsedRuleName { get; set; }
+        /// <summary>
+        /// 创建时间
+        /// </summary>
+        public DateTime CreationTime { get; set; }
+        /// <summary>
+        /// 最后更新时间
+        /// </summary>
+        public DateTime LastModificationTime { get; set; }
     }
 }

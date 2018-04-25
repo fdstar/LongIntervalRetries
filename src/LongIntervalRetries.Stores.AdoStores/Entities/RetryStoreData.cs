@@ -29,5 +29,9 @@ namespace LongIntervalRetries.Stores.AdoStores.Entities
         /// 完整的值类型全名，包含程序集名称
         /// </summary>
         public string DataTypeName { get; set; }
+        /// <summary>
+        /// 创建时间
+        /// </summary>
+        public DateTime CreationTime { get; set; }
     }
 }

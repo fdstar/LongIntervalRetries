@@ -25,8 +25,8 @@ namespace LongIntervalRetries.Stores
         /// <summary>
         /// 更新执行信息
         /// </summary>
-        /// <param name="entit"></param>
+        /// <param name="entity"></param>
         /// <returns></returns>
-        Task Executed(StoredExecutedInfo<TKey> entit);
+        Task Executed(StoredExecutedInfo<TKey> entity);
     }
 }
