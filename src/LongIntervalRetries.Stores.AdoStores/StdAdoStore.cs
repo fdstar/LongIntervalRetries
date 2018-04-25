@@ -161,17 +161,18 @@ namespace LongIntervalRetries.Stores.AdoStores
                 {
                     try
                     {
-                        var retryId = await conn.ExecuteScalarAsync<long>(this.InsertAndGetIdSqlWithRetryStore, store).ConfigureAwait(false);
+                        var retryId = await conn.ExecuteScalarAsync<long>(this.InsertAndGetIdSqlWithRetryStore, store, trans).ConfigureAwait(false);
                         if (retryId > 0)
                         {
                             var datas = this.Serializer(retryId, entity.JobMap);
                             if (datas != null && datas.Any())
                             {
-                                if (await conn.ExecuteAsync(this.InsertSqlWithRetryStoreData, datas).ConfigureAwait(false) == 0)
+                                if (await conn.ExecuteAsync(this.InsertSqlWithRetryStoreData, datas, trans).ConfigureAwait(false) == 0)
                                 {
                                     throw new Exception();
                                 }
                             }
+                            trans.Commit();
                             return retryId;
                         }
                         throw new Exception();
