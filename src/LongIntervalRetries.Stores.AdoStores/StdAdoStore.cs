@@ -136,7 +136,7 @@ namespace LongIntervalRetries.Stores.AdoStores
         /// <returns></returns>
         protected virtual IDictionary<string, object> Deserialize(IEnumerable<RetryStoreData> datas)
         {
-            return datas.ToDictionary(k => k.KeyName, v => JsonConvert.DeserializeObject(v.DataContent, this.GetType(v.DataTypeName)));
+            return datas.Where(d => d != null).ToDictionary(k => k.KeyName, v => JsonConvert.DeserializeObject(v.DataContent, this.GetType(v.DataTypeName)));
         }
         /// <summary>
         /// 添加Job信息
