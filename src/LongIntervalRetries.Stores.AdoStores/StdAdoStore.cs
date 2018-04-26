@@ -88,7 +88,7 @@ namespace LongIntervalRetries.Stores.AdoStores
                                Id = g.Key.Id,
                                ExecutedNumber = g.Key.ExecutedNumber,
                                JobStatus = g.Key.JobStatus,
-                               PreviousFireTimeUtc = new DateTimeOffset(g.Key.PreviousFireTime).ToUniversalTime(),
+                               PreviousFireTimeUtc = new DateTimeOffset(g.Key.PreviousFireTime),
                                UsedRuleName = g.Key.UsedRuleName,
                                JobType = this.GetType(g.Key.JobTypeName),
                                JobMap = Deserialize(g)

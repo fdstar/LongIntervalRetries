@@ -9,3 +9,5 @@
 /src/LongIntervalRetries.Samples.Jobs/bin
 /src/LongIntervalRetries.Stores.AdoStores/obj
 /src/LongIntervalRetries.Stores.AdoStores/bin
+/src/LongIntervalRetries.Samples.AdoStores/bin
+/src/LongIntervalRetries.Samples.AdoStores/obj

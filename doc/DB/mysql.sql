@@ -1,11 +1,11 @@
 CREATE TABLE `_RetryStores` (
 	`Id` BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
 	`JobTypeName` VARCHAR(200) NOT NULL COMMENT '完整的Job全名，包含程序集名称',
-	`ExecutedNumber` INT(11) NOT NULL COMMENT '当前已执行次数' DEFAULT 0 ,
-	`PreviousFireTime` Timestamp NOT NULL COMMENT '上一次执行时间' DEFAULT CURRENT_TIMESTAMP,
+	`ExecutedNumber` INT(11) NOT NULL DEFAULT 0  COMMENT '当前已执行次数',
+	`PreviousFireTime` DATETIME NOT NULL COMMENT '上一次执行时间',
 	`UsedRuleName` VARCHAR(100) NOT NULL COMMENT '要采用的规则' DEFAULT '',
-	`JobStatus` TINYINT(4) NOT NULL COMMENT '当前Job状态' DEFAULT 0,
-	`CreationTime` Timestamp NOT NULL COMMENT '创建时间' DEFAULT CURRENT_TIMESTAMP,
+	`JobStatus` TINYINT(4) NOT NULL DEFAULT 0 COMMENT '当前Job状态',
+	`CreationTime` Timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
 	`LastModificationTime` Timestamp NOT NULL COMMENT '最后修改时间' DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`Id`),
 	INDEX `IX_RetryStores_JobStatus` (`JobStatus`)

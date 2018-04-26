@@ -18,7 +18,7 @@ namespace LongIntervalRetries.Rules
         /// <returns></returns>
         public IRetryRule GetRule(string name = null)
         {
-            if (name == null)
+            if (string.IsNullOrWhiteSpace(name))
             {
                 return this._dictionary.FirstOrDefault().Value;
             }
