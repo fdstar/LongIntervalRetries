@@ -56,7 +56,14 @@ namespace LongIntervalRetries.Stores.AdoStores
         {
             await this.ExecuteAsync(async conn =>
             {
-                return await conn.ExecuteAsync(this.ExecutedSqlWithRetryStore, entity).ConfigureAwait(false);
+                return await conn.ExecuteAsync(this.ExecutedSqlWithRetryStore, new RetryStore
+                {
+                    Id = entity.Id,
+                    ExecutedNumber = entity.ExecutedNumber,
+                    JobStatus = entity.JobStatus,
+                    LastModificationTime = DateTime.Now,
+                    PreviousFireTime = entity.PreviousFireTimeUtc.HasValue ? entity.PreviousFireTimeUtc.Value.LocalDateTime : DateTime.Now,
+                }).ConfigureAwait(false);
             }).ConfigureAwait(false);
         }
         /// <summary>

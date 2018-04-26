@@ -42,7 +42,7 @@ namespace LongIntervalRetries
         /// <summary>
         /// 是否需要持久化<see cref="JobMap"/>数据
         /// </summary>
-        public bool PersistJobData { get; set; }
+        internal bool PersistJobData { get; set; }
         /// <summary>
         /// Job计划执行时间
         /// </summary>
