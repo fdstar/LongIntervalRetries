@@ -14,5 +14,11 @@
     <ProjectReference Include="..\LongIntervalRetries.Stores.AdoStores\LongIntervalRetries.Stores.AdoStores.csproj" />
     <ProjectReference Include="..\LongIntervalRetries\LongIntervalRetries.csproj" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <None Update="NLog.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 
 </Project>

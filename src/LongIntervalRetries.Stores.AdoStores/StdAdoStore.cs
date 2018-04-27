@@ -184,7 +184,7 @@ namespace LongIntervalRetries.Stores.AdoStores
                         }
                         throw new Exception();
                     }
-                    catch
+                    catch(Exception ex)
                     {
                         trans.Rollback();
                     }
