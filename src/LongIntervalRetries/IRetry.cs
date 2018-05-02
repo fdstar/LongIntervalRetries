@@ -29,11 +29,16 @@ namespace LongIntervalRetries
         /// <param name="registerInfo"></param>
         Task RegisterJob<TJob>(RetryJobRegisterInfo registerInfo) where TJob : IJob;
         /// <summary>
-        /// 注册要执行的Job
+        /// 在执行完指定PrevJob后注册执行NextJob
         /// </summary>
-        /// <param name="registerInfo"></param>
-        /// <param name="jobType"></param>
-        Task RegisterJob(RetryJobRegisterInfo registerInfo, Type jobType);
+        /// <typeparam name="PrevJob"></typeparam>
+        /// <typeparam name="NextJob"></typeparam>
+        /// <param name="regFunc">如何获取注册信息，如果返回null则表示不执行</param>
+        /// <param name="continueParams">需要继续执行的<see cref="RetryJobStatus"/>，每种状态只能注册一个委托，重复注册会替换掉已经注册的委托，默认为<see cref="RetryJobStatus.Completed"/></param>
+        /// <returns></returns>
+        void ContinueWith<PrevJob, NextJob>(Func<RetryJobExecutedInfo, RetryJobRegisterInfo> regFunc, params RetryJobStatus[] continueParams)
+            where PrevJob : IJob
+            where NextJob : IJob;
         /// <summary>
         /// 启动Job执行
         /// </summary>

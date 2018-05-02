@@ -23,7 +23,7 @@ namespace LongIntervalRetries
         /// </summary>
         public static string RetryRuleNameContextKey { get; set; } = "LongIntervalRetries.RetryRuleNameContextKey";
         /// <summary>
-        /// JobContext传递的<see cref="Stores.StoredInfo{TKey}.Id"/>对应的JobDataMap.Key
+        /// JobContext传递的<see cref="Stores.StoredExecutedInfo{TKey}.Id"/>对应的JobDataMap.Key
         /// </summary>
         public static string RetryStoredInfoIdContextKey { get; set; } = "LongIntervalRetries.RetryStoredInfoIdContextKey";
     }

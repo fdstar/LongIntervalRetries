@@ -4,6 +4,7 @@ using Quartz;
 using Quartz.Impl;
 using Quartz.Impl.Matchers;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -37,8 +38,10 @@ namespace LongIntervalRetries
         private IScheduler _scheduler;
         private IRetryRuleManager _ruleManager;
         private IStore<TKey> _store;
-        private Dictionary<string, RetryJobExecuted> _events = new Dictionary<string, RetryJobExecuted>();
-        
+        private ConcurrentDictionary<string, RetryJobExecuted> _events = new ConcurrentDictionary<string, RetryJobExecuted>();
+        private ConcurrentDictionary<string, IDictionary<string, Tuple<Type, Func<RetryJobExecutedInfo, RetryJobRegisterInfo>>>> _continues
+            = new ConcurrentDictionary<string, IDictionary<string, Tuple<Type, Func<RetryJobExecutedInfo, RetryJobRegisterInfo>>>>();
+
         /// <summary>
         /// 当前重试规则管理器
         /// </summary>
@@ -96,10 +99,23 @@ namespace LongIntervalRetries
         private async void JobListener_JobExecuted(RetryJobExecutedInfo executedInfo)
         {
             await this._store.Executed(this.GetStoredInfo(executedInfo)).ConfigureAwait(false);
-            var key = this.GetEventIdentity(executedInfo.JobType);
+            var key = this.GetJobIdentity(executedInfo.JobType);
             if (this._events.ContainsKey(key))
             {
                 this._events[key]?.Invoke(executedInfo);
+            }
+            if (this._continues.ContainsKey(key))
+            {
+                var dic = this._continues[key];
+                foreach (var k in dic.Keys.Where(k => k.EndsWith(string.Format("_{0}", (int)executedInfo.JobStatus))))
+                {
+                    var tuple = dic[k];
+                    var regInfo = tuple.Item2?.Invoke(executedInfo);
+                    if (regInfo != null)
+                    {
+                        await this.RegisterJob(regInfo, tuple.Item1).ConfigureAwait(false);
+                    }
+                }
             }
         }
         private StoredInfo<TKey> GetStoredInfo(RetryJobExecutedInfo executedInfo)
@@ -129,7 +145,7 @@ namespace LongIntervalRetries
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        protected virtual string GetEventIdentity(Type type)
+        protected virtual string GetJobIdentity(Type type)
         {
             return type.FullName;
         }
@@ -140,7 +156,11 @@ namespace LongIntervalRetries
         /// <param name="event"></param>
         public void RegisterEvent<TJob>(RetryJobExecuted @event) where TJob : IJob
         {
-            this._events[this.GetEventIdentity(typeof(TJob))] = @event;
+            if (@event == null)
+            {
+                return;
+            }
+            this._events[this.GetJobIdentity(typeof(TJob))] = @event;
         }
         /// <summary>
         /// 注册要执行的Job，注意此处不判断<see cref="IRetryRule"/>获取的TimeSpan是否小于TimeSpan.Zero，即注册的IJob必定会被执行
@@ -156,7 +176,7 @@ namespace LongIntervalRetries
         /// </summary>
         /// <param name="registerInfo"></param>
         /// <param name="jobType"></param>
-        public virtual async Task RegisterJob(RetryJobRegisterInfo registerInfo, Type jobType)
+        internal virtual async Task RegisterJob(RetryJobRegisterInfo registerInfo, Type jobType)
         {
             StoredInfo<TKey> storedInfo = new StoredInfo<TKey>()
             {
@@ -198,6 +218,44 @@ namespace LongIntervalRetries
         public async void Stop()
         {
             await this._scheduler.Shutdown().ConfigureAwait(false);
+        }
+        /// <summary>
+        /// 在执行完指定PrevJob后继续执行NextJob
+        /// </summary>
+        /// <typeparam name="PrevJob"></typeparam>
+        /// <typeparam name="NextJob"></typeparam>
+        /// <param name="regFunc">如何获取注册信息，如果返回null则表示不执行</param>
+        /// <param name="continueParams">需要继续执行的<see cref="RetryJobStatus"/>，每种状态只能注册一个委托，重复注册会替换掉已经注册的委托，默认为<see cref="RetryJobStatus.Completed"/></param>
+        /// <returns></returns>
+        public void ContinueWith<PrevJob, NextJob>(Func<RetryJobExecutedInfo, RetryJobRegisterInfo> regFunc, params RetryJobStatus[] continueParams)
+            where PrevJob : IJob
+            where NextJob : IJob
+        {
+            if (regFunc == null)
+            {
+                return;
+            }
+            if (continueParams == null || continueParams.Length == 0)
+            {
+                continueParams = new RetryJobStatus[] { RetryJobStatus.Completed };
+            }
+            var prevKey = this.GetJobIdentity(typeof(PrevJob));
+            var nextType = typeof(NextJob);
+            var nextKey = this.GetJobIdentity(nextType);
+            IDictionary<string, Tuple<Type, Func<RetryJobExecutedInfo, RetryJobRegisterInfo>>> dic = new Dictionary<string, Tuple<Type, Func<RetryJobExecutedInfo, RetryJobRegisterInfo>>>();
+            if (this._continues.ContainsKey(prevKey))
+            {
+                dic = this._continues[prevKey];
+            }
+            else
+            {
+                this._continues[prevKey] = dic;
+            }
+            foreach (var status in continueParams)
+            {
+                var key = string.Format("{0}_{1}", nextKey, (int)status);
+                dic[key] = Tuple.Create(nextType, regFunc);
+            }
         }
     }
 }
