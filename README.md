@@ -17,7 +17,7 @@
 ### `IStore<T>`
 目前Sql存储实现为`LongIntervalRetries.Stores.AdoStores`
 * `MySQLStore`基于MySQL存储实现，其初始化Sql目录为`/doc/DB/mysql.sql`
-* `StdAdoStore`基于MSSQL存储实现，其初始化Sql目录为`/doc/DB/sqlserver.sql`
+* `SqlServerStore`基于MSSQL存储实现，其初始化Sql目录为`/doc/DB/sqlserver.sql`
 
 ### `IRetryRuleManager`
 `IRetryRule`默认提供以下两种实现
