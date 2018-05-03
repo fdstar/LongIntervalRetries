@@ -28,13 +28,18 @@ namespace LongIntervalRetries.Samples.Default
             var tasks = new Task[] {
                 //注册Job
                 retry.RegisterJob<AlawaysSuccessJob>(new RetryJobRegisterInfo{ UsedRuleName= simpleRuleName, StartAt= DateTimeOffset.UtcNow.AddSeconds(3)}),
-                retry.RegisterJob<AlawaysFailJob>(new RetryJobRegisterInfo{ UsedRuleName= customRuleName}),
-                retry.RegisterJob<MaybeFailJob>(new RetryJobRegisterInfo{ JobMap=new Dictionary<string,object>{ {"Id",1 } } , UsedRuleName= customRuleName}),
-                retry.RegisterJob<MaybeFailJob>(new RetryJobRegisterInfo{ JobMap=new Dictionary<string,object>{ {"Id",2 } } ,UsedRuleName= customRuleName}),
-                retry.RegisterJob<MaybeFailJob>(new RetryJobRegisterInfo{ JobMap=new Dictionary<string,object>{ {"Id",3 } } ,UsedRuleName= customRuleName}),
-                retry.RegisterJob<MaybeFailJob>(new RetryJobRegisterInfo{ JobMap=new Dictionary<string,object>{ {"Id",4 } } ,UsedRuleName= customRuleName}),
-                retry.RegisterJob<MaybeFailJob>(new RetryJobRegisterInfo{ JobMap=new Dictionary<string,object>{ {"Id",5 } } ,UsedRuleName= "NotSetRule"}),
+                //retry.RegisterJob<AlawaysFailJob>(new RetryJobRegisterInfo{ UsedRuleName= customRuleName}),
+                //retry.RegisterJob<MaybeFailJob>(new RetryJobRegisterInfo{ JobMap=new Dictionary<string,object>{ {"Id",1 } } , UsedRuleName= customRuleName}),
+                //retry.RegisterJob<MaybeFailJob>(new RetryJobRegisterInfo{ JobMap=new Dictionary<string,object>{ {"Id",2 } } ,UsedRuleName= customRuleName}),
+                //retry.RegisterJob<MaybeFailJob>(new RetryJobRegisterInfo{ JobMap=new Dictionary<string,object>{ {"Id",3 } } ,UsedRuleName= customRuleName}),
+                //retry.RegisterJob<MaybeFailJob>(new RetryJobRegisterInfo{ JobMap=new Dictionary<string,object>{ {"Id",4 } } ,UsedRuleName= customRuleName}),
+                //retry.RegisterJob<MaybeFailJob>(new RetryJobRegisterInfo{ JobMap=new Dictionary<string,object>{ {"Id",5 } } ,UsedRuleName= "NotSetRule"}),
             };
+
+            retry.ContinueWith<AlawaysSuccessJob, MaybeFailJob>(i => new RetryJobRegisterInfo
+            {
+                JobMap = new Dictionary<string, object> { { "Id", DateTime.Now.Ticks % int.MaxValue } }
+            });
 
             //注册执行完时的通知事件
             retry.RegisterEvent<AlawaysSuccessJob>(e =>
