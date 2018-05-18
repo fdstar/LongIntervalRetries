@@ -7,6 +7,8 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace LongIntervalRetries.Samples.AdoStores
 {
@@ -25,17 +27,32 @@ namespace LongIntervalRetries.Samples.AdoStores
             string simpleRuleName = "SimpleRepeatRetryRule";
             var simpleRepeatRule = new SimpleRepeatRetryRule(simpleRuleName, 50, TimeSpan.FromSeconds(5));
             retry.RuleManager.AddRule(simpleRepeatRule);
-            var jobMap = new Dictionary<string, object>
-            {
-                { "key1",1},
-                { "key2","stringKey"}
-            };
+            //var jobMap = new Dictionary<string, object>
+            //{
+            //    { "key1",1},
+            //    { "key2","stringKey"}
+            //};
+            
             //可以注销RegisterJob来测试从数据库恢复Job的功能
-            await retry.RegisterJob<AlawaysFailJob>(new RetryJobRegisterInfo
-            {
-                JobMap = jobMap
-            }).ConfigureAwait(false);
+            //await retry.RegisterJob<AlawaysSuccessJob>(new RetryJobRegisterInfo
+            //{
+            //    JobMap = jobMap
+            //}).ConfigureAwait(false);
             retry.Start();
+            for (var i = 0; i < 100; i++)
+            {
+                Thread.Sleep(1000);
+                SimpleJob.Logger.Info("RegisterJob " + i);
+                await retry.RegisterJob<AlawaysSuccessJob>(new RetryJobRegisterInfo
+                {
+                    JobMap = new Dictionary<string, object>
+                    {
+                        { "Id",i},
+                        { "key2","stringKey"+i}
+                    }
+                }).ConfigureAwait(false);
+            }
+
         }
         static IStore<long> GetMySqlStore()
         {
