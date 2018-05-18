@@ -16,32 +16,20 @@ namespace LongIntervalRetries.Samples.AdoStores
     {
         static void Main(string[] args)
         {
-            Demo();
+            AdoStoreDemo();
             Console.ReadLine();
         }
 
-        static async void Demo()
+        static async void AdoStoreDemo()
         {
             var store = GetSqlServerDbFunc();
-            var retry = new StdRetry(/*store: store*/);
+            var retry = new StdRetry(store: store);
             string simpleRuleName = "SimpleRepeatRetryRule";
             var simpleRepeatRule = new SimpleRepeatRetryRule(simpleRuleName, 50, TimeSpan.FromSeconds(5));
             retry.RuleManager.AddRule(simpleRepeatRule);
-            //var jobMap = new Dictionary<string, object>
-            //{
-            //    { "key1",1},
-            //    { "key2","stringKey"}
-            //};
-            
-            //可以注销RegisterJob来测试从数据库恢复Job的功能
-            //await retry.RegisterJob<AlawaysSuccessJob>(new RetryJobRegisterInfo
-            //{
-            //    JobMap = jobMap
-            //}).ConfigureAwait(false);
             retry.Start();
             for (var i = 0; i < 100; i++)
             {
-                //Thread.Sleep(1000);
                 SimpleJob.Logger.Info("RegisterJob " + i);
                 await retry.RegisterJob<AlawaysSuccessJob>(new RetryJobRegisterInfo
                 {
@@ -52,7 +40,6 @@ namespace LongIntervalRetries.Samples.AdoStores
                     }
                 }).ConfigureAwait(false);
             }
-
         }
         static IStore<long> GetMySqlStore()
         {
