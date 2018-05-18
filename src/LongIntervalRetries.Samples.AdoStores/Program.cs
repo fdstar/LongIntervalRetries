@@ -23,7 +23,7 @@ namespace LongIntervalRetries.Samples.AdoStores
         static async void Demo()
         {
             var store = GetSqlServerDbFunc();
-            var retry = new StdRetry(store: store);
+            var retry = new StdRetry(/*store: store*/);
             string simpleRuleName = "SimpleRepeatRetryRule";
             var simpleRepeatRule = new SimpleRepeatRetryRule(simpleRuleName, 50, TimeSpan.FromSeconds(5));
             retry.RuleManager.AddRule(simpleRepeatRule);
@@ -41,7 +41,7 @@ namespace LongIntervalRetries.Samples.AdoStores
             retry.Start();
             for (var i = 0; i < 100; i++)
             {
-                Thread.Sleep(1000);
+                //Thread.Sleep(1000);
                 SimpleJob.Logger.Info("RegisterJob " + i);
                 await retry.RegisterJob<AlawaysSuccessJob>(new RetryJobRegisterInfo
                 {

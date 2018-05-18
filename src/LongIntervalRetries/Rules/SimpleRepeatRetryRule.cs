@@ -57,7 +57,11 @@ namespace LongIntervalRetries.Rules
         /// <returns></returns>
         public TimeSpan GetNextFireSpan(int executedNumber)
         {
-            if (executedNumber >= this._maxExecutedNumber)
+            if (executedNumber == 0)
+            {
+                return TimeSpan.Zero;
+            }
+            else if (executedNumber >= this._maxExecutedNumber)
             {
                 return TimeSpan.MinValue;
             }

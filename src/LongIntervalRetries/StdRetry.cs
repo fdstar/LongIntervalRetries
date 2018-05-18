@@ -211,8 +211,8 @@ namespace LongIntervalRetries
         private async Task RegisterJob(StoredInfo<TKey> storedInfo)
         {
             var ts = this._ruleManager.GetRule(storedInfo.UsedRuleName)?.GetNextFireSpan(storedInfo.ExecutedNumber);
-            var startTime = (storedInfo.PreviousFireTimeUtc ?? DateTimeOffset.UtcNow).AddSeconds(ts?.TotalSeconds ?? 0);
-            if (startTime < DateTimeOffset.UtcNow)
+            var startTime = storedInfo.PreviousFireTimeUtc?.AddSeconds(ts?.TotalSeconds ?? 0);
+            if (startTime.HasValue && startTime < DateTimeOffset.UtcNow)
             {
                 startTime = DateTimeOffset.UtcNow;
             }
