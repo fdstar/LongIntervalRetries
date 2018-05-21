@@ -33,6 +33,10 @@ namespace LongIntervalRetries.Rules
         /// </summary>
         string Name { get; }
         /// <summary>
+        /// 最大执行次数（第一次正常执行+失败重试总次数）
+        /// </summary>
+        int MaxExecutedNumber { get; }
+        /// <summary>
         /// 根据已经执行的次数获取下一次执行时间间隔，返回小于TimeSpan.Zero的值表示不再需要执行
         /// </summary>
         /// <param name="executedNumber">已经执行的次数</param>

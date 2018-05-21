@@ -30,10 +30,10 @@ namespace LongIntervalRetries.Rules
     {
         private TimeSpan[] _intervals;
         /// <summary>
-        /// 默认构造实现,注意<see cref="GetNextFireSpan(int)"/>会按索引从intervals中获取对应TimeSpan，如未找到则返回TimeSpan.MinValue
+        /// 默认构造实现,注意<see cref="GetNextFireSpan(int)"/>会按当前执行次数从intervals中获取对应TimeSpan（注意第一次正常执行不包含在intervals中），如未找到则返回TimeSpan.MinValue
         /// </summary>
         /// <param name="name">该RetryRule的唯一性名称</param>
-        /// <param name="intervals">自定义的时间间隔</param>
+        /// <param name="intervals">自定义的重试时间间隔，注意不包含第一次正常执行</param>
         public CustomIntervalRetryRule(string name, params TimeSpan[] intervals)
         {
             if (intervals == null || intervals.Length == 0)
@@ -52,15 +52,23 @@ namespace LongIntervalRetries.Rules
         /// </summary>
         public string Name { get; private set; }
         /// <summary>
+        /// 最大执行次数（第一次正常执行+失败重试总次数）
+        /// </summary>
+        public int MaxExecutedNumber { get { return this._intervals.Length + 1; } }
+        /// <summary>
         /// 根据已经执行的次数获取下一次执行时间间隔，返回小于TimeSpan.Zero的值表示不再需要执行
         /// </summary>
         /// <param name="executedNumber"></param>
         /// <returns></returns>
         public TimeSpan GetNextFireSpan(int executedNumber)
         {
-            if (executedNumber >= 0 && executedNumber < this._intervals.Length)
+            if (executedNumber <= 0)
             {
-                return this._intervals[executedNumber];
+                return TimeSpan.Zero;
+            }
+            else if (executedNumber <= this._intervals.Length)
+            {
+                return this._intervals[executedNumber - 1];
             }
             return TimeSpan.MinValue;
         }

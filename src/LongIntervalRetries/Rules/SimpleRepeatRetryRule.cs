@@ -28,13 +28,12 @@ namespace LongIntervalRetries.Rules
     /// </summary>
     public class SimpleRepeatRetryRule : IRetryRule
     {
-        private int _maxExecutedNumber;
         private TimeSpan _timeSpan;
         /// <summary>
         /// 默认构造实现
         /// </summary>
         /// <param name="name">该RetryRule的唯一性名称</param>
-        /// <param name="maxExecutedNumber">允许的最大重试次数（含）</param>
+        /// <param name="maxExecutedNumber">允许的最大执行次数（含第一次正常执行+失败重试总次数）</param>
         /// <param name="timeSpan"></param>
         public SimpleRepeatRetryRule(string name, int maxExecutedNumber, TimeSpan timeSpan)
         {
@@ -42,8 +41,16 @@ namespace LongIntervalRetries.Rules
             {
                 throw new ArgumentNullException("name can not be empty");
             }
+            if (maxExecutedNumber < 1)
+            {
+                throw new ArgumentException("maxExecutedNumber must be 1 or greater");
+            }
+            if (timeSpan < TimeSpan.Zero)
+            {
+                throw new ArgumentException("timeSpan must be greater than or equals with TimeSpan.Zero");
+            }
             this.Name = name;
-            this._maxExecutedNumber = maxExecutedNumber;
+            this.MaxExecutedNumber = maxExecutedNumber;
             this._timeSpan = timeSpan;
         }
         /// <summary>
@@ -51,17 +58,21 @@ namespace LongIntervalRetries.Rules
         /// </summary>
         public string Name { get; private set; }
         /// <summary>
+        /// 最大执行次数（第一次正常执行+失败重试总次数）
+        /// </summary>
+        public int MaxExecutedNumber { get; private set; }
+        /// <summary>
         /// 根据已经执行的次数获取下一次执行时间间隔，返回小于TimeSpan.Zero的值表示不再需要执行
         /// </summary>
         /// <param name="executedNumber"></param>
         /// <returns></returns>
         public TimeSpan GetNextFireSpan(int executedNumber)
         {
-            if (executedNumber == 0)
+            if (executedNumber <= 0)
             {
                 return TimeSpan.Zero;
             }
-            else if (executedNumber >= this._maxExecutedNumber)
+            else if (executedNumber >= this.MaxExecutedNumber)
             {
                 return TimeSpan.MinValue;
             }
