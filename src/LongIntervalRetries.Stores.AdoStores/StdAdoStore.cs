@@ -38,10 +38,16 @@ namespace LongIntervalRetries.Stores.AdoStores
         /// 构造函数
         /// </summary>
         /// <param name="dbFunc">用于获取IDbConnection的委托，注意该IDbConnection每次使用后都会被释放</param>
-        public StdAdoStore(Func<IDbConnection> dbFunc)
+        /// <param name="tablePrefix">表名前缀，默认不包含前缀，注意下划线(_)不属于前缀</param>
+        public StdAdoStore(Func<IDbConnection> dbFunc, string tablePrefix = "")
         {
             this.DbFunc = dbFunc ?? throw new ArgumentNullException();
+            this.TablePrefix = tablePrefix ?? string.Empty;
         }
+        /// <summary>
+        /// 表名前缀
+        /// </summary>
+        protected string TablePrefix { get; private set; }
         /// <summary>
         /// 获取数据库连接
         /// </summary>

@@ -30,10 +30,10 @@ namespace LongIntervalRetries.Rules
     {
         private TimeSpan[] _intervals;
         /// <summary>
-        /// 默认构造实现,注意<see cref="GetNextFireSpan(int)"/>会按当前执行次数从intervals中获取对应TimeSpan（注意第一次正常执行不包含在intervals中），如未找到则返回TimeSpan.MinValue
+        /// 默认构造实现,注意<see cref="GetNextFireSpan(int)"/>会按当前执行次数从intervals中获取对应TimeSpan（注意第一次正常执行不包含在intervals中,所以总执行次数为1+intervals.Length），如未找到则返回TimeSpan.MinValue
         /// </summary>
         /// <param name="name">该RetryRule的唯一性名称</param>
-        /// <param name="intervals">自定义的重试时间间隔，注意不包含第一次正常执行</param>
+        /// <param name="intervals">自定义的重试时间间隔，注意不包含第一次正常执行，所以总执行次数为1+intervals.Length</param>
         public CustomIntervalRetryRule(string name, params TimeSpan[] intervals)
         {
             if (intervals == null || intervals.Length == 0)

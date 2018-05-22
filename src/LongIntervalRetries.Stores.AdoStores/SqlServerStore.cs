@@ -35,8 +35,9 @@ namespace LongIntervalRetries.Stores.AdoStores
         /// </summary>
         /// <param name="dbFunc"></param>
         /// <param name="owner">数据库拥有者</param>
-        public SqlServerStore(Func<IDbConnection> dbFunc, string owner = "dbo")
-            : base(dbFunc)
+        /// <param name="tablePrefix"></param>
+        public SqlServerStore(Func<IDbConnection> dbFunc, string owner = "dbo", string tablePrefix = "")
+            : base(dbFunc, tablePrefix)
         {
             this._owner = string.IsNullOrWhiteSpace(owner) ? "" : string.Format("{0}.", owner);
         }
@@ -48,7 +49,7 @@ namespace LongIntervalRetries.Stores.AdoStores
             get
             {
                 return $@"SELECT [Id],[JobTypeName],[ExecutedNumber],[PreviousFireTime],[UsedRuleName],[JobStatus],[CreationTime],[LastModificationTime]
-FROM {this._owner}_RetryStores WHERE [JobStatus] = 0";
+FROM {this._owner}{this.TablePrefix}_RetryStores WHERE [JobStatus] = 0";
             }
         }
         /// <summary>
@@ -59,7 +60,7 @@ FROM {this._owner}_RetryStores WHERE [JobStatus] = 0";
             get
             {
                 return $@"SELECT rsd.[Id],[RetryStoreId],[KeyName],[DataContent],[DataTypeName],rsd.[CreationTime]
-FROM {this._owner}_RetryStores rs JOIN {this._owner}_RetryStoreDatas rsd ON rsd.[RetryStoreId] = rs.[Id]
+FROM {this._owner}{this.TablePrefix}_RetryStores rs JOIN {this._owner}{this.TablePrefix}_RetryStoreDatas rsd ON rsd.[RetryStoreId] = rs.[Id]
 WHERE rs.[JobStatus] = 0";
             }
         }
@@ -70,7 +71,7 @@ WHERE rs.[JobStatus] = 0";
         {
             get
             {
-                return $@"INSERT INTO {this._owner}_RetryStores 
+                return $@"INSERT INTO {this._owner}{this.TablePrefix}_RetryStores 
 ([JobTypeName],[ExecutedNumber],[PreviousFireTime],[UsedRuleName],[JobStatus],[CreationTime],[LastModificationTime]) 
 VALUES
 (@JobTypeName,@ExecutedNumber,@PreviousFireTime,@UsedRuleName,@JobStatus,@CreationTime,@LastModificationTime);
@@ -84,7 +85,7 @@ SELECT @@IDENTITY";
         {
             get
             {
-                return $@"INSERT INTO {this._owner}_RetryStoreDatas 
+                return $@"INSERT INTO {this._owner}{this.TablePrefix}_RetryStoreDatas 
 ([RetryStoreId],[KeyName],[DataContent],[DataTypeName],[CreationTime]) 
 VALUES
 (@RetryStoreId,@KeyName,@DataContent,@DataTypeName,@CreationTime)";
@@ -97,7 +98,7 @@ VALUES
         {
             get
             {
-                return $@"UPDATE {this._owner}_RetryStores
+                return $@"UPDATE {this._owner}{this.TablePrefix}_RetryStores
 SET [ExecutedNumber]=@ExecutedNumber,[PreviousFireTime]=@PreviousFireTime,[JobStatus]= @JobStatus,[LastModificationTime]= @LastModificationTime
 WHERE [Id]=@Id";
             }

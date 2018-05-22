@@ -38,7 +38,7 @@ create table dbo._RetryStoreDatas (
    DataContent          varchar(Max)         not null,
    DataTypeName         varchar(200)         not null,
    CreationTime         datetime             not null default getdate(),
-   constraint PK__RETRYSTOREDATAS primary key (Id)
+   constraint PK__RetryStoreDatas primary key (Id)
 )
 go
 
@@ -164,7 +164,7 @@ create table dbo._RetryStores (
    JobStatus            tinyint              not null,
    CreationTime         datetime             not null default getdate(),
    LastModificationTime datetime             not null default getdate(),
-   constraint PK__RETRYSTORES primary key nonclustered (Id)
+   constraint PK__RetryStores primary key nonclustered (Id)
 )
 go
 

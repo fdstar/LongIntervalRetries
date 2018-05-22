@@ -33,8 +33,9 @@ namespace LongIntervalRetries.Stores.AdoStores
         /// MySQL存储实现
         /// </summary>
         /// <param name="dbFunc"></param>
-        public MySQLStore(Func<IDbConnection> dbFunc)
-            : base(dbFunc)
+        /// <param name="tablePrefix"></param>
+        public MySQLStore(Func<IDbConnection> dbFunc, string tablePrefix = "")
+            : base(dbFunc, tablePrefix)
         {
         }
         /// <summary>
@@ -44,8 +45,8 @@ namespace LongIntervalRetries.Stores.AdoStores
         {
             get
             {
-                return @"SELECT `Id`,`JobTypeName`,`ExecutedNumber`,`PreviousFireTime`,`UsedRuleName`,`JobStatus`,`CreationTime`,`LastModificationTime`
-FROM `_RetryStores` WHERE `JobStatus` = 0";
+                return $@"SELECT `Id`,`JobTypeName`,`ExecutedNumber`,`PreviousFireTime`,`UsedRuleName`,`JobStatus`,`CreationTime`,`LastModificationTime`
+FROM `{this.TablePrefix}_RetryStores` WHERE `JobStatus` = 0";
             }
         }
         /// <summary>
@@ -55,9 +56,9 @@ FROM `_RetryStores` WHERE `JobStatus` = 0";
         {
             get
             {
-                return @"SELECT `_RetryStoreDatas`.`Id`,`RetryStoreId`,`KeyName`,`DataContent`,`DataTypeName`,`_RetryStoreDatas`.`CreationTime`
-FROM `_RetryStores` JOIN `_RetryStoreDatas` ON `_RetryStoreDatas`.`RetryStoreId` = `_RetryStores`.`Id`
-WHERE `_RetryStores`.`JobStatus` = 0";
+                return $@"SELECT `{this.TablePrefix}_RetryStoreDatas`.`Id`,`RetryStoreId`,`KeyName`,`DataContent`,`DataTypeName`,`{this.TablePrefix}_RetryStoreDatas`.`CreationTime`
+FROM `{this.TablePrefix}_RetryStores` JOIN `{this.TablePrefix}_RetryStoreDatas` ON `{this.TablePrefix}_RetryStoreDatas`.`RetryStoreId` = `{this.TablePrefix}_RetryStores`.`Id`
+WHERE `{this.TablePrefix}_RetryStores`.`JobStatus` = 0";
             }
         }
         /// <summary>
@@ -67,7 +68,7 @@ WHERE `_RetryStores`.`JobStatus` = 0";
         {
             get
             {
-                return @"INSERT INTO `_RetryStores` 
+                return $@"INSERT INTO `{this.TablePrefix}_RetryStores` 
 (`JobTypeName`,`ExecutedNumber`,`PreviousFireTime`,`UsedRuleName`,`JobStatus`,`CreationTime`,`LastModificationTime`) 
 VALUES
 (@JobTypeName,@ExecutedNumber,@PreviousFireTime,@UsedRuleName,@JobStatus,@CreationTime,@LastModificationTime);
@@ -81,7 +82,7 @@ SELECT CONVERT(LAST_INSERT_ID(), unsigned integer) AS ID";
         {
             get
             {
-                return @"INSERT INTO `_RetryStoreDatas` 
+                return $@"INSERT INTO `{this.TablePrefix}_RetryStoreDatas` 
 (`RetryStoreId`,`KeyName`,`DataContent`,`DataTypeName`,`CreationTime`) 
 VALUES
 (@RetryStoreId,@KeyName,@DataContent,@DataTypeName,@CreationTime)";
@@ -94,7 +95,7 @@ VALUES
         {
             get
             {
-                return @"UPDATE `_RetryStores`
+                return $@"UPDATE `{this.TablePrefix}_RetryStores`
 SET `ExecutedNumber`=@ExecutedNumber,`PreviousFireTime`=@PreviousFireTime,`JobStatus`= @JobStatus,`LastModificationTime`= @LastModificationTime
 WHERE `Id`=@Id";
             }
