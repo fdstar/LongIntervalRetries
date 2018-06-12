@@ -42,11 +42,12 @@ namespace LongIntervalRetries
         /// <param name="event"></param>
         void RegisterEvent<TJob>(RetryJobExecuted @event) where TJob : IJob;
         /// <summary>
-        /// 注册要执行的Job
+        /// 注册要执行的Job，注册成功则返回true，否则返回false
         /// </summary>
         /// <typeparam name="TJob"><see cref="IJob"/></typeparam>
         /// <param name="registerInfo"></param>
-        Task RegisterJob<TJob>(RetryJobRegisterInfo registerInfo) where TJob : IJob;
+        /// <returns></returns>
+        Task<bool> RegisterJob<TJob>(RetryJobRegisterInfo registerInfo) where TJob : IJob;
         /// <summary>
         /// 在执行完指定PrevJob后注册执行NextJob
         /// </summary>

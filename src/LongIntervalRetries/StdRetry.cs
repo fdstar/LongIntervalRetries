@@ -55,8 +55,8 @@ namespace LongIntervalRetries
     public class StdRetry<TKey> : IRetry
     {
         private IScheduler _scheduler;
-        private IRetryRuleManager _ruleManager;
         private IStore<TKey> _store;
+        private bool _isNoneStore;
         private ConcurrentDictionary<string, RetryJobExecuted> _events = new ConcurrentDictionary<string, RetryJobExecuted>();
         private ConcurrentDictionary<string, IDictionary<string, Tuple<Type, Func<RetryJobExecutedInfo, RetryJobRegisterInfo>>>> _continues
             = new ConcurrentDictionary<string, IDictionary<string, Tuple<Type, Func<RetryJobExecutedInfo, RetryJobRegisterInfo>>>>();
@@ -64,10 +64,7 @@ namespace LongIntervalRetries
         /// <summary>
         /// 当前重试规则管理器
         /// </summary>
-        public IRetryRuleManager RuleManager
-        {
-            get { return this._ruleManager; }
-        }
+        public IRetryRuleManager RuleManager { get; private set; }
         /// <summary>
         /// 默认构造实现
         /// </summary>
@@ -78,7 +75,7 @@ namespace LongIntervalRetries
         public StdRetry(IScheduler scheduler = null, IStore<TKey> store = null, IRetryRuleManager ruleManager = null, IRetryJobListener retryJobListener = null)
         {
             this._scheduler = scheduler;
-            this._ruleManager = ruleManager;
+            this.RuleManager = ruleManager;
             this._store = store;
             this.Init(retryJobListener);
         }
@@ -88,9 +85,9 @@ namespace LongIntervalRetries
             {
                 this._scheduler = await StdSchedulerFactory.GetDefaultScheduler().ConfigureAwait(false);
             }
-            if (_ruleManager == null)
+            if (RuleManager == null)
             {
-                this._ruleManager = new StdRetryRuleManager();
+                this.RuleManager = new StdRetryRuleManager();
             }
             if (_store == null)
             {
@@ -98,8 +95,9 @@ namespace LongIntervalRetries
             }
             if (retryJobListener == null)
             {
-                retryJobListener = new StdRetryJobListener(this._ruleManager);
+                retryJobListener = new StdRetryJobListener(this.RuleManager);
             }
+            _isNoneStore = this._store is NoneStore<TKey>;
             retryJobListener.JobExecuted += JobListener_JobExecuted;
             this._scheduler.ListenerManager.AddJobListener(retryJobListener, GroupMatcher<JobKey>.GroupEquals(StdRetrySetting.RetryGroupName));
             await this.RecoverRetries().ConfigureAwait(false);
@@ -186,16 +184,16 @@ namespace LongIntervalRetries
         /// </summary>
         /// <typeparam name="TJob"></typeparam>
         /// <param name="registerInfo"></param>
-        public async Task RegisterJob<TJob>(RetryJobRegisterInfo registerInfo) where TJob : IJob
+        public async Task<bool> RegisterJob<TJob>(RetryJobRegisterInfo registerInfo) where TJob : IJob
         {
-            await RegisterJob(registerInfo, typeof(TJob)).ConfigureAwait(false);
+            return await RegisterJob(registerInfo, typeof(TJob)).ConfigureAwait(false);
         }
         /// <summary>
         /// 注册要执行的Job
         /// </summary>
         /// <param name="registerInfo"></param>
         /// <param name="jobType"></param>
-        internal virtual async Task RegisterJob(RetryJobRegisterInfo registerInfo, Type jobType)
+        internal virtual async Task<bool> RegisterJob(RetryJobRegisterInfo registerInfo, Type jobType)
         {
             StoredInfo<TKey> storedInfo = new StoredInfo<TKey>()
             {
@@ -206,11 +204,16 @@ namespace LongIntervalRetries
                 UsedRuleName = registerInfo.UsedRuleName,
             };
             storedInfo.Id = await this._store.InsertAndGetId(storedInfo).ConfigureAwait(false);
-            await this.RegisterJob(storedInfo).ConfigureAwait(false);
+            if (_isNoneStore || (storedInfo.Id != null && !storedInfo.Id.Equals(default(TKey))))
+            {
+                await this.RegisterJob(storedInfo).ConfigureAwait(false);
+                return true;
+            }
+            return false;
         }
         private async Task RegisterJob(StoredInfo<TKey> storedInfo)
         {
-            var ts = this._ruleManager.GetRule(storedInfo.UsedRuleName)?.GetNextFireSpan(storedInfo.ExecutedNumber);
+            var ts = this.RuleManager.GetRule(storedInfo.UsedRuleName)?.GetNextFireSpan(storedInfo.ExecutedNumber);
             var startTime = storedInfo.PreviousFireTimeUtc?.AddSeconds(ts?.TotalSeconds ?? 0);
             if (startTime.HasValue && startTime < DateTimeOffset.UtcNow)
             {

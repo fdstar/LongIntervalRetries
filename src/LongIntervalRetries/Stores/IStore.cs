@@ -36,7 +36,7 @@ namespace LongIntervalRetries.Stores
         /// <returns></returns>
         Task<IEnumerable<StoredInfo<TKey>>> GetAllUnfinishedRetries();
         /// <summary>
-        /// 添加Job信息
+        /// 添加Job信息，并返回相应的Id，如果添加失败，则返回TKey的默认值
         /// </summary>
         /// <param name="entity"></param>
         /// <returns></returns>
