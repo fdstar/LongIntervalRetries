@@ -1,6 +1,9 @@
 # LongIntervalRetries
 这是一个基于Quartz.Net的重试类库，该类库对应需长时间间隔重试的业务类型，比如通知服务
 
+[![NuGet version (LongIntervalRetries)](https://img.shields.io/nuget/v/LongIntervalRetries.svg?style=flat-square)](https://www.nuget.org/packages/LongIntervalRetries/)
+[![GitHub license](https://img.shields.io/badge/license-Apache2.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
+
 ## .NET版本支持
 目前支持以下版本：`.NET452`、`.NET Standard 2.0`
 
@@ -63,3 +66,7 @@ retry.Start();//启动Quartz服务
 
 ### LongIntervalRetries.Samples.Default
 简单的使用例子，包含了如何注册`IRetryRule`，如何注册`IJob`，如何注册执行结果事件，如何通过`RetryJobRegisterInfo.JobMap`来传递参数到实际执行的`IJob`
+
+## Release History
+**2018-06-12**
+- Release v1.0.0
