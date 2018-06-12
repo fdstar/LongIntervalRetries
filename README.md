@@ -20,9 +20,9 @@
 * `SqlServerStore`基于MSSQL存储实现，其初始化Sql目录为`/doc/DB/sqlserver.sql`
 
 ### `IRetryRuleManager`
-`IRetryRule`默认提供以下两种实现
-* `SimpleRepeatRetryRule`简单重试规则，该规则简单的定义了最大重试次数以及简单的重试间隔
-* `CustomIntervalRetryRule`自定义间隔重试规则，该规则接收一系列的时间参数`params TimeSpan[] intervals`，该数组的`Length`属性即为允许尝试的最大次数，该规则会直接将执行次数作为索引获取对应`TimeSpan`
+`IRetryRule`默认提供以下两种实现，目前两种实现在第一次执行时均直接返回 `TimeSpan.Zero`，即在第一次执行时均立刻执行
+* `SimpleRepeatRetryRule`简单重试规则，该规则简单的定义了总执行次数以及简单的重试间隔(第一次正常执行 + 允许的重试次数 = 总执行次数)
+* `CustomIntervalRetryRule`自定义间隔重试规则，该规则接收一系列的时间参数`params TimeSpan[] intervals`，该数组的`Length`属性即为允许重试的最大次数，该规则会直接将 当前执行次数-1 作为索引获取对应`TimeSpan`（第一次正常执行 + intervals.Length = 总执行次数）
 
 ### 快速使用
 ```csharp
@@ -62,4 +62,4 @@ retry.Start();//启动Quartz服务
 * `MaybeFailJob`可能会执行失败的Job例子，该例子最符合实际情况，根据随机数来决定是否会抛出异常
 
 ### LongIntervalRetries.Samples.Default
-简单但又完整的使用例子，包含了如何注册`IRetryRule`，如何注册`IJob`，如何注册执行结果事件，如何通过`RetryJobRegisterInfo.JobMap`来传递参数到实际执行的`IJob`
+简单的使用例子，包含了如何注册`IRetryRule`，如何注册`IJob`，如何注册执行结果事件，如何通过`RetryJobRegisterInfo.JobMap`来传递参数到实际执行的`IJob`
