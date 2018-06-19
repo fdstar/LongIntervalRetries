@@ -67,6 +67,9 @@ retry.Start();//启动Quartz服务
 ### LongIntervalRetries.Samples.Default
 简单的使用例子，包含了如何注册`IRetryRule`，如何注册`IJob`，如何注册执行结果事件，如何通过`RetryJobRegisterInfo.JobMap`来传递参数到实际执行的`IJob`
 
+### LongIntervalRetries.Samples.AdoStores
+用于展示如何支持将注册请求持久化至关系型数据库`MySql`及`MSSQL`
+
 ## Release History
 **2018-06-12**
 - Release v1.0.0
