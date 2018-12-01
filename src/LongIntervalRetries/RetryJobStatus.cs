@@ -44,5 +44,9 @@ namespace LongIntervalRetries
         /// 由job给定异常指定终止
         /// </summary>
         Aborted = 3,
+        /// <summary>
+        /// 未完成已杀死，根据设置的Death Time来确定
+        /// </summary>
+        Killed = 4,
     }
 }

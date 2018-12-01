@@ -114,6 +114,7 @@ namespace LongIntervalRetries.Stores.AdoStores
                                ExecutedNumber = g.Key.ExecutedNumber,
                                JobStatus = g.Key.JobStatus,
                                PreviousFireTimeUtc = new DateTimeOffset(g.Key.PreviousFireTime),
+                               DeathTimeUtc = new DateTimeOffset(g.Key.DeathTime),
                                UsedRuleName = g.Key.UsedRuleName,
                                JobType = this.GetType(g.Key.JobTypeName),
                                JobMap = Deserialize(g)
@@ -187,6 +188,7 @@ namespace LongIntervalRetries.Stores.AdoStores
                     JobTypeName = this.GetTypeName(entity.JobType),
                     LastModificationTime = DateTime.Now,
                     PreviousFireTime = entity.PreviousFireTimeUtc.HasValue ? entity.PreviousFireTimeUtc.Value.LocalDateTime : DateTime.Now,
+                    DeathTime = entity.DeathTimeUtc.HasValue ? entity.DeathTimeUtc.Value.LocalDateTime : DateTime.MaxValue,
                     UsedRuleName = entity.UsedRuleName ?? string.Empty,
                 };
                 using (var trans = conn.BeginTransaction())

@@ -41,5 +41,9 @@ namespace LongIntervalRetries.Stores
         /// 要采用的<see cref="IRetryRule"/>规则，若不设定，则采用第一条规则
         /// </summary>
         public string UsedRuleName { get; set; }
+        /// <summary>
+        /// 如果设置了该时间，那么当
+        /// </summary>
+        public DateTimeOffset? DeathTimeUtc { get; set; }
     }
 }

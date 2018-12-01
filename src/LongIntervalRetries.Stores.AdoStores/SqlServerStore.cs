@@ -48,7 +48,7 @@ namespace LongIntervalRetries.Stores.AdoStores
         {
             get
             {
-                return $@"SELECT [Id],[JobTypeName],[ExecutedNumber],[PreviousFireTime],[UsedRuleName],[JobStatus],[CreationTime],[LastModificationTime]
+                return $@"SELECT [Id],[JobTypeName],[ExecutedNumber],[PreviousFireTime],[DeathTime],[UsedRuleName],[JobStatus],[CreationTime],[LastModificationTime]
 FROM {this._owner}{this.TablePrefix}_RetryStores WHERE [JobStatus] = 0";
             }
         }
@@ -72,9 +72,9 @@ WHERE rs.[JobStatus] = 0";
             get
             {
                 return $@"INSERT INTO {this._owner}{this.TablePrefix}_RetryStores 
-([JobTypeName],[ExecutedNumber],[PreviousFireTime],[UsedRuleName],[JobStatus],[CreationTime],[LastModificationTime]) 
+([JobTypeName],[ExecutedNumber],[PreviousFireTime],[DeathTime],[UsedRuleName],[JobStatus],[CreationTime],[LastModificationTime]) 
 VALUES
-(@JobTypeName,@ExecutedNumber,@PreviousFireTime,@UsedRuleName,@JobStatus,@CreationTime,@LastModificationTime);
+(@JobTypeName,@ExecutedNumber,@PreviousFireTime,@DeathTime,@UsedRuleName,@JobStatus,@CreationTime,@LastModificationTime);
 SELECT @@IDENTITY";
             }
         }

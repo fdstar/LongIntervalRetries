@@ -46,6 +46,10 @@ namespace LongIntervalRetries.Stores.AdoStores.Entities
         /// </summary>
         public DateTime PreviousFireTime { get; set; }
         /// <summary>
+        /// Job死亡时间，注意该时间代表即使Job重试次数还没达到<see cref="RetryJobStatus.Canceled"/>，但只要到了这个时间，就不再继续执行Job
+        /// </summary>
+        public DateTime DeathTime { get; set; }
+        /// <summary>
         /// 完整的Job全名，包含程序集名称
         /// </summary>
         public string JobTypeName { get; set; }
