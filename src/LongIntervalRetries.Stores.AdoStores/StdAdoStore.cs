@@ -203,19 +203,19 @@ namespace LongIntervalRetries.Stores.AdoStores
                             {
                                 if (await conn.ExecuteAsync(this.InsertSqlWithRetryStoreData, datas, trans).ConfigureAwait(false) == 0)
                                 {
-                                    throw new Exception();
+                                    throw new Exception("Insert Fail");
                                 }
                             }
                             trans.Commit();
                             return retryId;
                         }
-                        throw new Exception();
+                        throw new Exception("Insert Fail");
                     }
-                    catch(Exception ex)
+                    catch
                     {
                         trans.Rollback();
+                        throw;
                     }
-                    return 0;
                 }
             }).ConfigureAwait(false);
         }

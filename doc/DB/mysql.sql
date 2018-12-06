@@ -18,7 +18,7 @@ CREATE TABLE `_RetryStoreDatas` (
 	`Id` BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
 	`RetryStoreId` BIGINT(20) NOT NULL COMMENT '_RetryStores.Id',
 	`KeyName` VARCHAR(200) NOT NULL COMMENT '键值名',
-	`DataContent` Text NOT NULL COMMENT '序列化后的数据内容',
+	`DataContent` LONGTEXT NOT NULL COMMENT '序列化后的数据内容',
 	`DataTypeName` VARCHAR(200) NOT NULL COMMENT '完整的值类型全名，包含程序集名称',
 	`CreationTime` Timestamp NOT NULL COMMENT '创建时间' DEFAULT CURRENT_TIMESTAMP,
 	PRIMARY KEY (`Id`),
