@@ -29,17 +29,19 @@ namespace LongIntervalRetries.Samples.AdoStores
             retry.RuleManager.AddRule(simpleRepeatRule);
             retry.Start();
             //return;
-            for (var i = 0; i < 100; i++)
+            for (var i = 0; i < 1; i++)
             {
                 SimpleJob.Logger.Info("RegisterJob " + i);
-                await retry.RegisterJob<AlawaysSuccessJob>(new RetryJobRegisterInfo
+                var info = new RetryJobRegisterInfo
                 {
                     JobMap = new Dictionary<string, object>
                     {
                         { "Id",i},
-                        { "key2","stringKey"+i}
+                        { "key2","stringKey"+i},
+                        { "value",System.IO.File.ReadAllText("11.txt")}
                     }
-                }).ConfigureAwait(false);
+                };
+                await retry.RegisterJob<AlawaysSuccessJob>(info).ConfigureAwait(false);
             }
         }
         const string tablePrefix = "";

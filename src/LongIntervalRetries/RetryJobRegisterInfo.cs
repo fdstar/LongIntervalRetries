@@ -41,5 +41,9 @@ namespace LongIntervalRetries
         /// 首次开始运行时间，不赋值则代表立刻运行
         /// </summary>
         public DateTimeOffset? StartAt { get; set; }
+        /// <summary>
+        /// 结束运行时间，将与<see cref="IRetryRule.GetNextFireSpan(int)"/>竞争
+        /// </summary>
+        public DateTimeOffset? StopAt { get; set; }
     }
 }

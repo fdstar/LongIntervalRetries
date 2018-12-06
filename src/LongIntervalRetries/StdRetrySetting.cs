@@ -45,5 +45,9 @@ namespace LongIntervalRetries
         /// JobContext传递的<see cref="Stores.StoredExecutedInfo{TKey}.Id"/>对应的JobDataMap.Key
         /// </summary>
         public static string RetryStoredInfoIdContextKey { get; set; } = "LongIntervalRetries.RetryStoredInfoIdContextKey";
+        /// <summary>
+        /// Job终止时间对应的JobDataMap.Key
+        /// </summary>
+        public static string ExecutedDeathTimeContextKey { get; set; } = "LongIntervalRetries.ExecutedDeathTimeContextKey";
     }
 }

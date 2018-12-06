@@ -202,6 +202,7 @@ namespace LongIntervalRetries
                 PreviousFireTimeUtc = registerInfo.StartAt,
                 JobType = jobType,
                 UsedRuleName = registerInfo.UsedRuleName,
+                DeathTimeUtc = registerInfo.StopAt
             };
             storedInfo.Id = await this._store.InsertAndGetId(storedInfo).ConfigureAwait(false);
             if (_isNoneStore || (storedInfo.Id != null && !storedInfo.Id.Equals(default(TKey))))
@@ -223,8 +224,9 @@ namespace LongIntervalRetries
             jobMap[StdRetrySetting.ExecutedNumberContextKey] = storedInfo.ExecutedNumber;
             jobMap[StdRetrySetting.RetryRuleNameContextKey] = storedInfo.UsedRuleName;
             jobMap[StdRetrySetting.RetryStoredInfoIdContextKey] = storedInfo.Id;
+            jobMap[StdRetrySetting.ExecutedDeathTimeContextKey] = storedInfo.DeathTimeUtc;
             var job = QuartzHelper.BuildJob(storedInfo.JobType, jobMap);
-            var trigger = QuartzHelper.BuildTrigger(startTime);
+            var trigger = QuartzHelper.BuildTrigger(startTime, storedInfo.DeathTimeUtc);
             await _scheduler.ScheduleJob(job, trigger).ConfigureAwait(false);
         }
         /// <summary>

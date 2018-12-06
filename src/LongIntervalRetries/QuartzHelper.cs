@@ -26,11 +26,12 @@ namespace LongIntervalRetries
 {
     internal class QuartzHelper
     {
-        public static ITrigger BuildTrigger(DateTimeOffset? startAt, string name = null)
+        public static ITrigger BuildTrigger(DateTimeOffset? startAt, DateTimeOffset? endAt = null, string name = null)
         {
             return TriggerBuilder.Create()
                 .WithIdentity(name ?? Guid.NewGuid().ToString(), StdRetrySetting.RetryGroupName)
                 .StartAt(startAt ?? DateTimeOffset.UtcNow)
+                .EndAt(endAt)
                 .WithSimpleSchedule(x => x.WithRepeatCount(0))
                 .Build();
         }

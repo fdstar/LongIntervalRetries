@@ -71,7 +71,7 @@ namespace LongIntervalRetries
             }
             var executedNumber = jobMap.GetIntValue(StdRetrySetting.ExecutedNumberContextKey) + 1;
             if (executedNumber < 1) executedNumber = 1;
-            var removeKeies = new string[] { StdRetrySetting.ExecutedNumberContextKey, StdRetrySetting.RetryRuleNameContextKey, StdRetrySetting.RetryStoredInfoIdContextKey };
+            var removeKeies = new string[] { StdRetrySetting.ExecutedNumberContextKey, StdRetrySetting.RetryRuleNameContextKey, StdRetrySetting.RetryStoredInfoIdContextKey, StdRetrySetting.ExecutedDeathTimeContextKey };
             var executedJobMap = new Dictionary<string, object>(jobMap);
             object storeId = null;
             if (jobMap.ContainsKey(StdRetrySetting.RetryStoredInfoIdContextKey))
@@ -82,26 +82,31 @@ namespace LongIntervalRetries
             {
                 executedJobMap.Remove(key);
             }
-            var jobStatus = RetryJobStatus.Completed;
             var ruleName = jobMap.GetString(StdRetrySetting.RetryRuleNameContextKey);
-            if (jobException != null)
+            var deathTime = jobMap.Get(StdRetrySetting.ExecutedDeathTimeContextKey) as DateTimeOffset?;
+            var jobStatus = RetryJobStatus.Killed;
+            if (!deathTime.HasValue || deathTime >= DateTimeOffset.Now)
             {
-                jobStatus = RetryJobStatus.Canceled;
-                if (jobException.InnerException?.InnerException != null
-                    && jobException.InnerException?.InnerException is RetryJobAbortedException)
+                jobStatus = RetryJobStatus.Completed;
+                if (jobException != null)
                 {
-                    jobStatus = RetryJobStatus.Aborted;
-                }
-                else
-                {
-                    var ts = this._ruleManager.GetRule(ruleName)?.GetNextFireSpan(executedNumber);
-                    if (ts >= TimeSpan.Zero)
+                    jobStatus = RetryJobStatus.Canceled;
+                    if (jobException.InnerException?.InnerException != null
+                        && jobException.InnerException?.InnerException is RetryJobAbortedException)
                     {
-                        jobStatus = RetryJobStatus.Continue;
-                        var trigger = QuartzHelper.BuildTrigger(DateTimeOffset.UtcNow.AddSeconds(ts.Value.TotalSeconds));
-                        jobMap[StdRetrySetting.ExecutedNumberContextKey] = executedNumber;
-                        var job = QuartzHelper.BuildJob(jobType, jobMap);
-                        await context.Scheduler.ScheduleJob(job, trigger).ConfigureAwait(false);
+                        jobStatus = RetryJobStatus.Aborted;
+                    }
+                    else
+                    {
+                        var ts = this._ruleManager.GetRule(ruleName)?.GetNextFireSpan(executedNumber);
+                        if (ts >= TimeSpan.Zero)
+                        {
+                            jobStatus = RetryJobStatus.Continue;
+                            var trigger = QuartzHelper.BuildTrigger(DateTimeOffset.UtcNow.AddSeconds(ts.Value.TotalSeconds), deathTime);
+                            jobMap[StdRetrySetting.ExecutedNumberContextKey] = executedNumber;
+                            var job = QuartzHelper.BuildJob(jobType, jobMap);
+                            await context.Scheduler.ScheduleJob(job, trigger).ConfigureAwait(false);
+                        }
                     }
                 }
             }
