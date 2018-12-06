@@ -42,6 +42,12 @@ namespace LongIntervalRetries
         }
         public override string Name => "LongIntervalRetries.RetryJobListener";
 
+        public override Task JobExecutionVetoed(IJobExecutionContext context, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            //TODO:增加Job被否决时的业务逻辑
+            return base.JobExecutionVetoed(context, cancellationToken);
+        }
+
         public override Task JobWasExecuted(IJobExecutionContext context, JobExecutionException jobException, CancellationToken cancellationToken = default(CancellationToken))
         {
             if (context.Trigger.Key.Group == StdRetrySetting.RetryGroupName)
@@ -84,11 +90,11 @@ namespace LongIntervalRetries
             }
             var ruleName = jobMap.GetString(StdRetrySetting.RetryRuleNameContextKey);
             var deathTime = jobMap.Get(StdRetrySetting.ExecutedDeathTimeContextKey) as DateTimeOffset?;
-            var jobStatus = RetryJobStatus.Killed;
-            if (!deathTime.HasValue || deathTime >= DateTimeOffset.Now)
+            var jobStatus = RetryJobStatus.Completed;
+            if (jobException != null)
             {
-                jobStatus = RetryJobStatus.Completed;
-                if (jobException != null)
+                jobStatus = RetryJobStatus.Killed;
+                if (!deathTime.HasValue || deathTime >= DateTimeOffset.Now)
                 {
                     jobStatus = RetryJobStatus.Canceled;
                     if (jobException.InnerException?.InnerException != null
