@@ -180,8 +180,9 @@ namespace LongIntervalRetries
             this._events[this.GetJobIdentity(typeof(TJob))] = @event;
         }
         /// <summary>
-        /// 注册要执行的Job，注意此处不判断<see cref="IRetryRule"/>获取的TimeSpan是否小于TimeSpan.Zero，即注册的IJob必定会被执行
-        /// 但此处会判断EndAt是否大于StartAt或大于当前时间
+        /// 注册要执行的Job，注意注册成功时此处不判断<see cref="IRetryRule"/>获取的TimeSpan是否小于TimeSpan.Zero，即注册成功的IJob必定会被执行
+        /// 但此处会判断EndAt是否大于StartAt或大于当前时间，如果判断不通过，则Job注册失败
+        /// 另外如果存在数据持久化，那么外部需捕获持久化异常，目前存储异常不会返回false，而是抛出异常
         /// </summary>
         /// <typeparam name="TJob"></typeparam>
         /// <param name="registerInfo"></param>
