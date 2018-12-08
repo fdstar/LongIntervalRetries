@@ -38,7 +38,6 @@ namespace LongIntervalRetries.Samples.AdoStores
                     {
                         { "Id",i},
                         { "key2","stringKey"+i},
-                        { "value",System.IO.File.ReadAllText("11.txt")}
                     }
                 };
                 await retry.RegisterJob<AlawaysSuccessJob>(info).ConfigureAwait(false);

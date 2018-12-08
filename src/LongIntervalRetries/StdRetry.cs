@@ -181,6 +181,7 @@ namespace LongIntervalRetries
         }
         /// <summary>
         /// 注册要执行的Job，注意此处不判断<see cref="IRetryRule"/>获取的TimeSpan是否小于TimeSpan.Zero，即注册的IJob必定会被执行
+        /// 但此处会判断EndAt是否大于StartAt或大于当前时间
         /// </summary>
         /// <typeparam name="TJob"></typeparam>
         /// <param name="registerInfo"></param>
@@ -195,6 +196,11 @@ namespace LongIntervalRetries
         /// <param name="jobType"></param>
         internal virtual async Task<bool> RegisterJob(RetryJobRegisterInfo registerInfo, Type jobType)
         {
+            if ((registerInfo.EndAt.HasValue && registerInfo.EndAt <= DateTimeOffset.Now)
+                || (registerInfo.StartAt ?? DateTimeOffset.Now) > registerInfo.EndAt)
+            {
+                return false;
+            }
             StoredInfo<TKey> storedInfo = new StoredInfo<TKey>()
             {
                 JobStatus = RetryJobStatus.Continue,
@@ -202,7 +208,7 @@ namespace LongIntervalRetries
                 PreviousFireTimeUtc = registerInfo.StartAt,
                 JobType = jobType,
                 UsedRuleName = registerInfo.UsedRuleName,
-                DeathTimeUtc = registerInfo.StopAt
+                DeathTimeUtc = registerInfo.EndAt
             };
             storedInfo.Id = await this._store.InsertAndGetId(storedInfo).ConfigureAwait(false);
             if (_isNoneStore || (storedInfo.Id != null && !storedInfo.Id.Equals(default(TKey))))
@@ -216,9 +222,24 @@ namespace LongIntervalRetries
         {
             var ts = this.RuleManager.GetRule(storedInfo.UsedRuleName)?.GetNextFireSpan(storedInfo.ExecutedNumber);
             var startTime = storedInfo.PreviousFireTimeUtc?.AddSeconds(ts?.TotalSeconds ?? 0);
-            if (startTime.HasValue && startTime < DateTimeOffset.UtcNow)
+            if (!startTime.HasValue || startTime < DateTimeOffset.UtcNow)
             {
                 startTime = DateTimeOffset.UtcNow;
+            }
+            if (storedInfo.DeathTimeUtc.HasValue && startTime > storedInfo.DeathTimeUtc)
+            {
+                this.JobListener_JobExecuted(new RetryJobExecutedInfo
+                {
+                    ExecutedNumber = storedInfo.ExecutedNumber,
+                    FireTimeUtc = storedInfo.PreviousFireTimeUtc ?? DateTime.MaxValue,
+                    JobMap = storedInfo.JobMap,
+                    JobStatus = RetryJobStatus.Killed,
+                    JobType = storedInfo.JobType,
+                    ScheduledFireTimeUtc = storedInfo.PreviousFireTimeUtc,
+                    StoredInfoId = storedInfo.Id,
+                    UsedRuleName = storedInfo.UsedRuleName
+                });
+                return;
             }
             var jobMap = new JobDataMap(storedInfo.JobMap);
             jobMap[StdRetrySetting.ExecutedNumberContextKey] = storedInfo.ExecutedNumber;

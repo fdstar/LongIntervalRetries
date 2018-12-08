@@ -43,7 +43,8 @@ namespace LongIntervalRetries
         public DateTimeOffset? StartAt { get; set; }
         /// <summary>
         /// 结束运行时间，将与<see cref="IRetryRule.GetNextFireSpan(int)"/>竞争
+        /// 该值必须大于<see cref="DateTimeOffset.Now"/>，否则必定注册失败
         /// </summary>
-        public DateTimeOffset? StopAt { get; set; }
+        public DateTimeOffset? EndAt { get; set; }
     }
 }
