@@ -46,5 +46,9 @@ namespace LongIntervalRetries.Stores
         /// 上一次执行时间，注意实际Job执行时间会在此基础上加上<see cref="IRetryRule.GetNextFireSpan(int)"/>时间
         /// </summary>
         public DateTimeOffset? PreviousFireTimeUtc { get; set; }
+        /// <summary>
+        /// 当前Job执行时产生的异常
+        /// </summary>
+        public Exception Exception { get; set; }
     }
 }

@@ -70,5 +70,9 @@ namespace LongIntervalRetries
         /// Job实际执行时间
         /// </summary>
         public DateTimeOffset FireTimeUtc { get; set; }
+        /// <summary>
+        /// Job执行时产生的异常
+        /// </summary>
+        public Exception Exception { get; set; }
     }
 }

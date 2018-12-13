@@ -15,7 +15,7 @@ namespace LongIntervalRetries.Samples.Jobs
             await base.Execute(context);
             context.MergedJobDataMap["Time"] = DateTime.Now;
             Logger.Error("{0} will thrown an Exception.", JobName);
-            throw new Exception(JobName);
+            throw new Exception(JobName + DateTime.Now.ToString(" yyyy-MM-dd HH:mm:ss:fff"));
         }
     }
 }

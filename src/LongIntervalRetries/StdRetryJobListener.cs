@@ -104,8 +104,9 @@ namespace LongIntervalRetries
             if (jobException != null)
             {
                 jobStatus = RetryJobStatus.Canceled;
-                if (jobException.InnerException?.InnerException != null
-                    && jobException.InnerException?.InnerException is RetryJobAbortedException)
+                var ex = this.GetInnermostException(jobException);
+                executedInfo.Exception = ex;
+                if (ex is RetryJobAbortedException)
                 {
                     jobStatus = RetryJobStatus.Aborted;
                 }
@@ -129,6 +130,15 @@ namespace LongIntervalRetries
             }
             executedInfo.JobStatus = jobStatus;
             this.JobExecuted?.Invoke(executedInfo);
+        }
+        private Exception GetInnermostException(Exception ex)
+        {
+            var tmpEx = ex;
+            while (tmpEx.InnerException != null)
+            {
+                tmpEx = tmpEx.InnerException;
+            }
+            return tmpEx;
         }
     }
 }

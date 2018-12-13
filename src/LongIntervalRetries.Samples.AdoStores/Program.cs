@@ -40,7 +40,7 @@ namespace LongIntervalRetries.Samples.AdoStores
                         { "key2","stringKey"+i},
                     }
                 };
-                await retry.RegisterJob<AlawaysSuccessJob>(info).ConfigureAwait(false);
+                await retry.RegisterJob<AlawaysFailJob>(info).ConfigureAwait(false);
             }
         }
         const string tablePrefix = "";

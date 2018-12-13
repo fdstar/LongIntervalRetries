@@ -99,7 +99,7 @@ VALUES
             get
             {
                 return $@"UPDATE {this._owner}{this.TablePrefix}_RetryStores
-SET [ExecutedNumber]=@ExecutedNumber,[PreviousFireTime]=@PreviousFireTime,[JobStatus]= @JobStatus,[LastModificationTime]= @LastModificationTime
+SET [ExecutedNumber]=@ExecutedNumber,[PreviousFireTime]=@PreviousFireTime,[JobStatus]= @JobStatus,[LastModificationTime]= @LastModificationTime,[LastException]= isnull(@LastException,[LastException])
 WHERE [Id]=@Id";
             }
         }

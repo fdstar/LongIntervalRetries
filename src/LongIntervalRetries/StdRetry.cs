@@ -146,6 +146,7 @@ namespace LongIntervalRetries
                 ExecutedNumber = executedInfo.ExecutedNumber,
                 Id = (TKey)executedInfo.StoredInfoId,
                 PreviousFireTimeUtc = this.GetFireTimeUtcForStore(executedInfo),
+                Exception = executedInfo.Exception
             };
         }
         /// <summary>

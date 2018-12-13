@@ -18,6 +18,7 @@
 #endregion
 
 using Dapper;
+using LongIntervalRetries.Exceptions;
 using LongIntervalRetries.Stores.AdoStores.Entities;
 using Newtonsoft.Json;
 using System;
@@ -81,6 +82,18 @@ namespace LongIntervalRetries.Stores.AdoStores
         {
             await this.ExecuteAsync(async conn =>
             {
+                string exMsg = null;
+                if (entity.Exception != null)
+                {
+                    if (entity.Exception is RetryJobAbortedException)
+                    {
+                        exMsg = entity.Exception.Message;//如果是终止，那么只记录Message部分
+                    }
+                    else
+                    {
+                        exMsg = entity.Exception.ToString();
+                    }
+                }
                 return await conn.ExecuteAsync(this.ExecutedSqlWithRetryStore, new RetryStore
                 {
                     Id = entity.Id,
@@ -88,6 +101,7 @@ namespace LongIntervalRetries.Stores.AdoStores
                     JobStatus = entity.JobStatus,
                     LastModificationTime = DateTime.Now,
                     PreviousFireTime = entity.PreviousFireTimeUtc.HasValue ? entity.PreviousFireTimeUtc.Value.LocalDateTime : DateTime.Now,
+                    LastException = exMsg
                 }).ConfigureAwait(false);
             }).ConfigureAwait(false);
         }

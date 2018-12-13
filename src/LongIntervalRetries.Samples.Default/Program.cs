@@ -28,7 +28,7 @@ namespace LongIntervalRetries.Samples.Default
             var tasks = new Task<bool>[] {
                 //注册Job
                 //retry.RegisterJob<AlawaysSuccessJob>(new RetryJobRegisterInfo{ UsedRuleName= simpleRuleName, StartAt= DateTimeOffset.UtcNow.AddSeconds(3)}),
-                retry.RegisterJob<AlawaysFailJob>(new RetryJobRegisterInfo{ UsedRuleName= simpleRuleName,EndAt =DateTimeOffset.Now.AddSeconds(2), StartAt=DateTimeOffset.Now.AddSeconds(3)}),
+                retry.RegisterJob<AlawaysFailJob>(new RetryJobRegisterInfo{ UsedRuleName= simpleRuleName,/*EndAt =DateTimeOffset.Now.AddSeconds(2),*/ StartAt=DateTimeOffset.Now.AddSeconds(3)}),
                 //retry.RegisterJob<MaybeFailJob>(new RetryJobRegisterInfo{ JobMap=new Dictionary<string,object>{ {"Id",1 } } , UsedRuleName= customRuleName}),
                 //retry.RegisterJob<MaybeFailJob>(new RetryJobRegisterInfo{ JobMap=new Dictionary<string,object>{ {"Id",2 } } ,UsedRuleName= customRuleName}),
                 //retry.RegisterJob<MaybeFailJob>(new RetryJobRegisterInfo{ JobMap=new Dictionary<string,object>{ {"Id",3 } } ,UsedRuleName= customRuleName}),

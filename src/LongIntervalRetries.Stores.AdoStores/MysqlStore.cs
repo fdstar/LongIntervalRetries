@@ -96,7 +96,7 @@ VALUES
             get
             {
                 return $@"UPDATE `{this.TablePrefix}_RetryStores`
-SET `ExecutedNumber`=@ExecutedNumber,`PreviousFireTime`=@PreviousFireTime,`JobStatus`= @JobStatus,`LastModificationTime`= @LastModificationTime
+SET `ExecutedNumber`=@ExecutedNumber,`PreviousFireTime`=@PreviousFireTime,`JobStatus`= @JobStatus,`LastModificationTime`= @LastModificationTime,`LastException`= ifnull(@LastException,`LastException`)
 WHERE `Id`=@Id";
             }
         }

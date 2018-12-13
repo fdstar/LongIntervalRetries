@@ -65,5 +65,9 @@ namespace LongIntervalRetries.Stores.AdoStores.Entities
         /// 最后更新时间
         /// </summary>
         public DateTime LastModificationTime { get; set; }
+        /// <summary>
+        /// 最后一次执行错误信息
+        /// </summary>
+        public string LastException { get; set; } = string.Empty;
     }
 }
