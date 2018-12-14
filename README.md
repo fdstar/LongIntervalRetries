@@ -71,5 +71,8 @@ retry.Start();//启动Quartz服务
 用于展示如何支持将注册请求持久化至关系型数据库`MySql`及`MSSQL`
 
 ## Release History
+**2018-12-14**
+- Release v1.1.0 增加用于在指定时间结束Job的`EndAt`，以及增加用于记录最后一次执行异常的`LastException`
+
 **2018-06-12**
 - Release v1.0.0
