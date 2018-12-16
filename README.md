@@ -19,8 +19,8 @@
 
 ### `IStore<T>`
 目前Sql存储实现为`LongIntervalRetries.Stores.AdoStores`
-* `MySQLStore`基于MySQL存储实现，其初始化Sql目录为`/doc/DB/mysql.sql`
-* `SqlServerStore`基于MSSQL存储实现，其初始化Sql目录为`/doc/DB/sqlserver.sql`
+* `MySQLStore`基于MySQL存储实现，其初始化Sql目录为`/doc/DB/(version)/mysql.sql`
+* `SqlServerStore`基于MSSQL存储实现，其初始化Sql目录为`/doc/DB/(version)/sqlserver.sql`
 
 ### `IRetryRuleManager`
 `IRetryRule`默认提供以下两种实现，目前两种实现在第一次执行时均直接返回 `TimeSpan.Zero`，即在第一次执行时均立刻执行
@@ -71,6 +71,9 @@ retry.Start();//启动Quartz服务
 用于展示如何支持将注册请求持久化至关系型数据库`MySql`及`MSSQL`
 
 ## Release History
+**2018-12-16**
+- Release v1.1.1 修复因为`EndAt`导致`quartz`重启还未`Start`时杀死的Job未能触发`RegisterEvent`的问题
+
 **2018-12-14**
 - Release v1.1.0 增加用于在指定时间结束Job的`EndAt`，以及增加用于记录最后一次执行异常的`LastException`
 
