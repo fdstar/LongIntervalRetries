@@ -60,6 +60,8 @@ namespace LongIntervalRetries
         private ConcurrentDictionary<string, RetryJobExecuted> _events = new ConcurrentDictionary<string, RetryJobExecuted>();
         private ConcurrentDictionary<string, IDictionary<string, Tuple<Type, Func<RetryJobExecutedInfo, RetryJobRegisterInfo>>>> _continues
             = new ConcurrentDictionary<string, IDictionary<string, Tuple<Type, Func<RetryJobExecutedInfo, RetryJobRegisterInfo>>>>();
+        //重启恢复时在Quartz还没启动就因为各种原因被判断结束了的Job集合
+        private IList<RetryJobExecutedInfo> _endWhileRecover = new List<RetryJobExecutedInfo>();
 
         /// <summary>
         /// 当前重试规则管理器
@@ -230,7 +232,7 @@ namespace LongIntervalRetries
             }
             if (storedInfo.DeathTimeUtc.HasValue && startTime > storedInfo.DeathTimeUtc)
             {
-                this.JobListener_JobExecuted(new RetryJobExecutedInfo
+                this._endWhileRecover.Add(new RetryJobExecutedInfo
                 {
                     ExecutedNumber = storedInfo.ExecutedNumber,
                     FireTimeUtc = storedInfo.PreviousFireTimeUtc ?? DateTime.MaxValue,
@@ -257,6 +259,10 @@ namespace LongIntervalRetries
         /// </summary>
         public async void Start()
         {
+            foreach (var info in this._endWhileRecover)
+            {
+                this.JobListener_JobExecuted(info);
+            }
             await this._scheduler.Start().ConfigureAwait(false);
         }
         /// <summary>

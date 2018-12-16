@@ -3,6 +3,8 @@ using LongIntervalRetries.Samples.Jobs;
 using LongIntervalRetries.Stores;
 using LongIntervalRetries.Stores.AdoStores;
 using MySql.Data.MySqlClient;
+using Newtonsoft.Json;
+using NLog;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -14,6 +16,7 @@ namespace LongIntervalRetries.Samples.AdoStores
 {
     class Program
     {
+        protected static readonly Logger Logger = LogManager.GetLogger("Default");
         static void Main(string[] args)
         {
             AdoStoreDemo();
@@ -27,6 +30,10 @@ namespace LongIntervalRetries.Samples.AdoStores
             string simpleRuleName = "SimpleRepeatRetryRule";
             var simpleRepeatRule = new SimpleRepeatRetryRule(simpleRuleName, 50, TimeSpan.FromSeconds(5));
             retry.RuleManager.AddRule(simpleRepeatRule);
+            retry.RegisterEvent<AlawaysFailJob>(e =>
+            {
+                Logger.Info("AlawaysFailJob Result:{0}", JsonConvert.SerializeObject(e));
+            });
             retry.Start();
             //return;
             for (var i = 0; i < 1; i++)
