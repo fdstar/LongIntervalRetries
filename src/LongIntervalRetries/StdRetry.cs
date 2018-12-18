@@ -263,6 +263,7 @@ namespace LongIntervalRetries
             {
                 this.JobListener_JobExecuted(info);
             }
+            this._endWhileRecover.Clear();
             await this._scheduler.Start().ConfigureAwait(false);
         }
         /// <summary>
