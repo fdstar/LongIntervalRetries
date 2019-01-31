@@ -1,5 +1,5 @@
 # LongIntervalRetries
-这是一个基于Quartz.Net的重试类库，该类库对应需长时间间隔重试的业务类型，比如通知服务
+这是一个基于Quartz.Net的重试类库，该类库对应需长时间间隔重试的业务类型，比如通知服务，当然其本质还是Job。
 
 [![NuGet version (LongIntervalRetries)](https://img.shields.io/nuget/v/LongIntervalRetries.svg?style=flat-square)](https://www.nuget.org/packages/LongIntervalRetries/)
 [![GitHub license](https://img.shields.io/badge/license-Apache2.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
