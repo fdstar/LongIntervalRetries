@@ -5,7 +5,7 @@
     <Authors>dong fang</Authors>
     <Description>Retry class library based on Quartz.Net, which is mainly applied to business types requiring long interval retry.</Description>
     <PackageProjectUrl>https://github.com/fdstar/LongIntervalRetries</PackageProjectUrl>
-    <PackageLicenseUrl>https://www.apache.org/licenses/LICENSE-2.0</PackageLicenseUrl>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageTags>retry</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>

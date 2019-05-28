@@ -57,11 +57,11 @@ namespace LongIntervalRetries
         private IScheduler _scheduler;
         private IStore<TKey> _store;
         private bool _isNoneStore;
-        private ConcurrentDictionary<string, RetryJobExecuted> _events = new ConcurrentDictionary<string, RetryJobExecuted>();
-        private ConcurrentDictionary<string, IDictionary<string, Tuple<Type, Func<RetryJobExecutedInfo, RetryJobRegisterInfo>>>> _continues
+        private readonly ConcurrentDictionary<string, RetryJobExecuted> _events = new ConcurrentDictionary<string, RetryJobExecuted>();
+        private readonly ConcurrentDictionary<string, IDictionary<string, Tuple<Type, Func<RetryJobExecutedInfo, RetryJobRegisterInfo>>>> _continues
             = new ConcurrentDictionary<string, IDictionary<string, Tuple<Type, Func<RetryJobExecutedInfo, RetryJobRegisterInfo>>>>();
         //重启恢复时在Quartz还没启动就因为各种原因被判断结束了的Job集合
-        private IList<RetryJobExecutedInfo> _endWhileRecover = new List<RetryJobExecutedInfo>();
+        private readonly IList<RetryJobExecutedInfo> _endWhileRecover = new List<RetryJobExecutedInfo>();
 
         /// <summary>
         /// 当前重试规则管理器
@@ -245,11 +245,13 @@ namespace LongIntervalRetries
                 });
                 return;
             }
-            var jobMap = new JobDataMap(storedInfo.JobMap);
-            jobMap[StdRetrySetting.ExecutedNumberContextKey] = storedInfo.ExecutedNumber;
-            jobMap[StdRetrySetting.RetryRuleNameContextKey] = storedInfo.UsedRuleName;
-            jobMap[StdRetrySetting.RetryStoredInfoIdContextKey] = storedInfo.Id;
-            jobMap[StdRetrySetting.ExecutedDeathTimeContextKey] = storedInfo.DeathTimeUtc;
+            var jobMap = new JobDataMap(storedInfo.JobMap)
+            {
+                [StdRetrySetting.ExecutedNumberContextKey] = storedInfo.ExecutedNumber,
+                [StdRetrySetting.RetryRuleNameContextKey] = storedInfo.UsedRuleName,
+                [StdRetrySetting.RetryStoredInfoIdContextKey] = storedInfo.Id,
+                [StdRetrySetting.ExecutedDeathTimeContextKey] = storedInfo.DeathTimeUtc
+            };
             var job = QuartzHelper.BuildJob(storedInfo.JobType, jobMap);
             var trigger = QuartzHelper.BuildTrigger(startTime, storedInfo.DeathTimeUtc);
             await _scheduler.ScheduleJob(job, trigger).ConfigureAwait(false);
