@@ -27,6 +27,9 @@
 * `SimpleRepeatRetryRule`简单重试规则，该规则简单的定义了总执行次数以及简单的重试间隔(第一次正常执行 + 允许的重试次数 = 总执行次数)
 * `CustomIntervalRetryRule`自定义间隔重试规则，该规则接收一系列的时间参数`params TimeSpan[] intervals`，该数组的`Length`属性即为允许重试的最大次数，该规则会直接将 当前执行次数-1 作为索引获取对应`TimeSpan`（第一次正常执行 + intervals.Length = 总执行次数）
 
+### `LongIntervalRetries.Exceptions.RetryJobAbortedException`
+在Job执行过程中，你可能发现数据存在问题，或指定业务内容已经处理完成，那么这时候你可以人为的返回成功，但这样在执行结果过滤上无法过滤出真实执行完成和假的执行完成，如果你直接抛出`Exception`，使得类库反复执行指定次数的`Job`再结束也是可以，但存在性能上的浪费，这时候你可通过抛出`RetryJobAbortedException`，这是一个自定义异常，专门用于终止当前`Job`。
+
 ### 快速使用
 ```csharp
 var retry = new StdRetry();
